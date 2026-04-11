@@ -1,0 +1,45 @@
+#!/bin/sh
+
+echo "Running pre-commit checks..."
+
+# -------------------------------------------------------
+# PHP: Laravel Pint (ホストのPHPで実行)
+# -------------------------------------------------------
+STAGED_PHP=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.php$" || true)
+
+if [ -n "$STAGED_PHP" ]; then
+    echo "> PHP Pint: checking staged PHP files..."
+    php vendor/bin/pint --test $STAGED_PHP
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "[FAILED] PHP Pint check failed."
+        echo "  Run 'php vendor/bin/pint' to auto-fix, then re-stage the files."
+        exit 1
+    fi
+    echo "[OK] PHP Pint passed."
+fi
+
+# -------------------------------------------------------
+# TypeScript / React: ESLint + Prettier (Sail経由で実行)
+# -------------------------------------------------------
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E "\.(ts|tsx)$" || true)
+
+if [ -n "$STAGED_TS" ]; then
+    echo "> ESLint + Prettier: checking staged TypeScript files..."
+
+    if ! ./vendor/bin/sail ps 2>/dev/null | grep -q "Up"; then
+        echo "[WARN] Laravel Sail is not running. Skipping TypeScript checks."
+        echo "  Start Sail with './vendor/bin/sail up -d' to enable TS checks."
+    else
+        ./vendor/bin/sail npx lint-staged
+        if [ $? -ne 0 ]; then
+            echo ""
+            echo "[FAILED] ESLint / Prettier check failed."
+            echo "  Run 'npm run lint' and 'npm run format' to fix, then re-stage."
+            exit 1
+        fi
+        echo "[OK] ESLint + Prettier passed."
+    fi
+fi
+
+echo "All pre-commit checks passed."

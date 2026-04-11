@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Domain\Post\Entities;
+
+use DateTimeImmutable;
+use JsonSerializable;
+
+class Post implements JsonSerializable
+{
+    public function __construct(
+        public readonly string $id,
+        public readonly string $userId,
+        public readonly string $userName,
+        public readonly string $content,
+        public readonly DateTimeImmutable $createdAt,
+        public readonly int $likesCount,
+        public readonly bool $likedByAuthUser,
+    ) {}
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'userId' => $this->userId,
+            'userName' => $this->userName,
+            'content' => $this->content,
+            'createdAt' => $this->createdAt->format('Y/m/d H:i'),
+            'likesCount' => $this->likesCount,
+            'likedByAuthUser' => $this->likedByAuthUser,
+        ];
+    }
+}
