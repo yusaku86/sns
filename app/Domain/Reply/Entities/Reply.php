@@ -15,6 +15,9 @@ class Reply implements JsonSerializable
         public readonly string $userHandle,
         public readonly string $content,
         public readonly DateTimeImmutable $createdAt,
+        public readonly ?string $postContent = null,
+        public readonly ?string $postUserName = null,
+        public readonly ?string $postUserHandle = null,
     ) {}
 
     public function jsonSerialize(): array
@@ -27,6 +30,9 @@ class Reply implements JsonSerializable
             'userHandle' => $this->userHandle,
             'content' => $this->content,
             'createdAt' => $this->createdAt->format('Y/m/d H:i'),
+            'postContent' => $this->postContent,
+            'postUserName' => $this->postUserName,
+            'postUserHandle' => $this->postUserHandle,
         ];
     }
 }

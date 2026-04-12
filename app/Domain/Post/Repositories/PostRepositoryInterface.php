@@ -20,4 +20,7 @@ interface PostRepositoryInterface
 
     /** @return Post[] */
     public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20): array;
+
+    /** @return Post[] */
+    public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20): array;
 }

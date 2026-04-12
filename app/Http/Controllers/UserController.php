@@ -20,13 +20,18 @@ class UserController extends Controller
 
     public function show(Request $request, User $user): Response
     {
-        $profile = $this->getUserProfile->execute(
+        $result = $this->getUserProfile->execute(
             userId: $user->id,
             authUserId: $request->user()?->id,
         );
 
+        abort_if(! $result, 404);
+
         return Inertia::render('users/show', [
-            'user' => $profile,
+            'user' => $result['user'],
+            'posts' => $result['posts'],
+            'replies' => $result['replies'],
+            'likedPosts' => $result['likedPosts'],
         ]);
     }
 

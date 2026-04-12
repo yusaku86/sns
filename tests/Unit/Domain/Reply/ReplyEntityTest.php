@@ -47,5 +47,8 @@ it('返信エンティティをJSON化できる', function () {
         'userHandle' => 'test_user',
         'content' => 'テスト返信内容',
         'createdAt' => '2026/04/12 10:00',
+        'postContent' => null,
+        'postUserName' => null,
+        'postUserHandle' => null,
     ]);
 });
