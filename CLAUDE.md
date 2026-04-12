@@ -1,25 +1,49 @@
-# プロジェクトルール
+# CLAUDE.md
 
-このファイルはClaude Codeに自動で読み込まれます。
-実装時は以下のルールを必ず順守してください。
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## ドキュメント参照
+## 開発コマンド
 
-- 要件定義: `requirements.md`
-- 設計書: `design.md`
+開発環境は **Laravel Sail**（Docker）で動作する。全コマンドは `./vendor/bin/sail` 経由で実行する。
+
+```bash
+# コンテナ起動・停止
+./vendor/bin/sail up -d
+./vendor/bin/sail down
+
+# マイグレーション
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan migrate:fresh --seed   # DB初期化＋シーダー
+
+# テスト（全件）
+./vendor/bin/sail artisan test
+
+# テスト（単一ファイル）
+./vendor/bin/sail artisan test tests/Unit/Domain/Post/PostEntityTest.php
+
+# テスト（単一ケース）
+./vendor/bin/sail artisan test --filter "投稿を作成できる"
+
+# フロントエンドビルド
+./vendor/bin/sail npm run build   # 本番ビルド
+./vendor/bin/sail npm run dev     # 開発サーバー（ホットリロード）
+
+# PHPコードスタイル修正
+php vendor/bin/pint
+
+# Wayfinder（TypeScriptルート定義）再生成
+./vendor/bin/sail artisan wayfinder:generate
+```
 
 ---
 
-## アーキテクチャルール（Clean Architecture）
+## アーキテクチャ概要
 
-### 層の依存方向
+### レイヤー構成（Clean Architecture）
+
 ```
 Presentation → Application → Domain ← Infrastructure
 ```
-
-依存は必ず内側（Domain）に向けること。外側の層が内側に依存するのは禁止。
-
-### 各層の制約
 
 | 層 | ディレクトリ | 禁止事項 |
 |----|-------------|----------|
@@ -28,81 +52,69 @@ Presentation → Application → Domain ← Infrastructure
 | Infrastructure | `app/Infrastructure/` | ドメインロジックを書かない |
 | Presentation | `app/Http/` | ビジネスロジックをControllerに書かない |
 
-### UseCaseのルール
-- 1クラス1メソッド（`execute()`）
-- Controllerから直接Eloquentを呼ばない。必ずUseCaseを経由する
+### DI（依存性注入）の登録
+
+`app/Providers/AppServiceProvider.php` でRepositoryのInterfaceと実装クラスをバインドしている。新しいRepositoryを追加したら必ずここに登録する。
+
+### Eloquentモデルの配置
+
+- **実体**: `app/Infrastructure/Eloquent/Models/`（UUID生成 `boot()` あり）
+- **薄いラッパー**: `app/Models/`（Laravelフレームワークが期待するパスのため、Infrastructureクラスを継承するだけ）
+
+`app/Models/` に新規ファイルを作成しない。
+
+### Factoryの名前解決
+
+`AppServiceProvider::configureFactories()` でFactoryの名前解決をカスタマイズしている。`App\Infrastructure\Eloquent\Models\Post` → `Database\Factories\PostFactory` と解決される。
+
+---
+
+## フロントエンド
+
+### ルーティング（Wayfinder）
+
+Ziggyではなく **Wayfinder** を使用。`.gitignore` に含まれる `resources/js/routes/` と `resources/js/actions/` はビルド時に自動生成される。
+
+```typescript
+// URL文字列が必要な場合（useForm().post() など）
+import { store } from '@/routes/posts';
+post(store.url());
+
+// Inertia Link の href に渡す場合（RouteDefinitionオブジェクトも受け付ける）
+import { timeline } from '@/routes';
+<Link href={timeline()} />
+```
+
+### レイアウト自動割り当て（`resources/js/app.tsx`）
+
+| ページパス | レイアウト |
+|---|---|
+| `welcome` | なし |
+| `auth/*` | AuthLayout |
+| `settings/*`, `teams/*` | AppLayout + SettingsLayout |
+| その他 | AppLayout |
+
+### ドメインエンティティのJSON変換
+
+`DateTimeImmutable` などJSON化できないプロパティを持つEntityには `JsonSerializable` を実装する（`app/Domain/Post/Entities/Post.php` が参考実装）。
+
+---
+
+## テストのルール
+
+- **Pest** を使用し `it()` / `test()` 記法で書く
+- Unit Test: `tests/Unit/` — DBに依存しない。UseCaseはRepositoryを `mock()` する
+- Feature Test: `tests/Feature/` — SQLiteインメモリDB使用。認証ルートは `actingAs()` を使用
+- **実装と同時にテストを作成する**（後回し禁止）
 
 ---
 
 ## UUID ルール
 
 - 全テーブルの主キーはUUID（文字列型）
-- IDの生成はEloquentモデルの `boot()` で行う
-- `Str::uuid()` を使用する
-- マイグレーションでは `$table->uuid('id')->primary()` を使用する
-
----
-
-## 命名規則
-
-### PHP（バックエンド）
-| 対象 | 規則 | 例 |
-|------|------|----|
-| クラス名 | PascalCase | `CreatePostUseCase` |
-| メソッド名 | camelCase | `execute()` |
-| DBカラム名 | snake_case | `user_id`, `created_at` |
-| Repositoryの実装クラス | `Eloquent` + Interface名 | `EloquentPostRepository` |
-
-### TypeScript（フロントエンド）
-| 対象 | 規則 | 例 |
-|------|------|----|
-| コンポーネント | PascalCase | `PostCard` |
-| ファイル名 | kebab-case | `post-card.tsx` |
-| ページファイル | Inertiaのパスに合わせる | `pages/users/show.tsx` |
-
----
-
-## Inertia.js のルール
-
-- データはコントローラーから `Inertia::render('PageName', [...])` で渡す
-- フロントからのリクエストは `router.post()` / `useForm()` を使う
-- APIエンドポイント（`/api/*`）は作成しない
-
----
-
-## テストのルール
-
-### テストフレームワーク
-- **Pest**（導入済み）を使用する
-
-### テストの種類と配置
-
-| 種類 | 対象 | 配置 |
-|------|------|------|
-| Unit Test | Domain Entity, UseCase | `tests/Unit/` |
-| Feature Test | Controller, ルーティング | `tests/Feature/` |
-
-### 作成タイミング
-- **実装と同時にテストを作成する**（後回し禁止）
-- 実装順序の各ステップでテストも合わせて作成する
-
-### Unit Test のルール
-- Domain EntityとUseCaseは必ずUnit Testを作成する
-- UseCaseのテストではRepositoryをモック（`mock()`）する
-- Eloquent・DBに依存しないテストにする
-
-### Feature Test のルール
-- 各Controllerのエンドポイントに対してFeature Testを作成する
-- 認証が必要なルートは `actingAs()` を使用する
-- テスト用DBはSQLiteインメモリを使用する（高速化のため）
-
-### テストの命名規則
-```php
-// Pest の it() / test() を使用する
-it('投稿を作成できる');
-it('140文字を超える投稿は作成できない');
-it('他のユーザーの投稿は削除できない');
-```
+- IDの生成はEloquentモデルの `boot()` で `Str::uuid()` を使う
+- マイグレーション: `$table->uuid('id')->primary()`
+- 外部キー: `$table->foreignUuid('user_id')`
 
 ---
 
@@ -123,6 +135,25 @@ it('他のユーザーの投稿は削除できない');
 
 ---
 
+## 命名規則
+
+### PHP
+| 対象 | 規則 | 例 |
+|------|------|----|
+| クラス名 | PascalCase | `CreatePostUseCase` |
+| メソッド名 | camelCase | `execute()` |
+| DBカラム名 | snake_case | `user_id`, `created_at` |
+| Repository実装クラス | `Eloquent` + Interface名 | `EloquentPostRepository` |
+
+### TypeScript
+| 対象 | 規則 | 例 |
+|------|------|----|
+| コンポーネント | PascalCase | `PostCard` |
+| ファイル名 | kebab-case | `post-card.tsx` |
+| ページファイル | Inertiaのパスに合わせる | `pages/users/show.tsx` |
+
+---
+
 ## 禁止事項
 
 - Controllerにビジネスロジックを書く
@@ -131,3 +162,10 @@ it('他のユーザーの投稿は削除できない');
 - `app/Models/` 配下に新規ファイルを作成する（Infrastructure層を使う）
 - フロントエンドからAPIルート（`/api/*`）を叩く
 - テストを書かずに実装を完了とする
+
+---
+
+## 参照ドキュメント
+
+- 要件定義: `requirements.md`
+- 設計書: `design.md`

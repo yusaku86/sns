@@ -21,10 +21,10 @@ export default function FollowButton({ userId, isFollowing }: Props) {
         <button
             onClick={handleClick}
             disabled={processing}
-            className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors disabled:opacity-50 ${
+            className={`h-10 rounded-full px-4 text-sm font-semibold transition-colors disabled:opacity-50 ${
                 isFollowing
-                    ? 'border-border bg-transparent hover:border-destructive hover:text-destructive'
-                    : 'border-transparent bg-foreground text-background hover:opacity-80'
+                    ? 'border border-[#E5E7EB] bg-transparent text-[#111827] hover:border-[#b36b09] hover:text-[#b36b09]'
+                    : 'border-transparent bg-[#3a6c72] text-white hover:opacity-90'
             }`}
         >
             {isFollowing ? 'フォロー中' : 'フォローする'}

@@ -1,5 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react';
-import { Heart, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
 import { store as likePost, destroy as unlikePost } from '@/routes/likes';
 import { destroy as destroyPost } from '@/routes/posts';
 
@@ -7,6 +7,7 @@ type Post = {
     id: string;
     userId: string;
     userName: string;
+    userHandle: string;
     content: string;
     createdAt: string;
     likesCount: number;
@@ -35,58 +36,98 @@ export default function PostCard({ post }: { post: Post }) {
         }
     }
 
+    const initial = post.userName.charAt(0).toUpperCase();
+
     return (
-        <div className="border-b border-border p-4">
-            <div className="flex items-start justify-between gap-2">
+        <div className="border-b border-[#E5E7EB] p-4 transition-colors hover:bg-[#eae4dc]">
+            <div className="flex gap-3">
+                {/* アバター 48px */}
+                <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
+                    aria-hidden="true"
+                >
+                    {initial}
+                </div>
+
+                {/* コンテンツ */}
                 <div className="min-w-0 flex-1">
-                    <span className="text-sm font-semibold">
-                        {post.userName}
-                    </span>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                        {post.createdAt}
-                    </span>
-                    <p className="mt-1 text-sm break-words whitespace-pre-wrap">
+                    {/* ヘッダー行: 名前 · @handle · 時刻 */}
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0">
+                            <span className="truncate text-sm font-semibold text-[#191816]">
+                                {post.userName}
+                            </span>
+                            <span className="shrink-0 font-mono text-sm text-[#8a8784]">
+                                @{post.userHandle}
+                            </span>
+                            <span className="shrink-0 text-sm text-[#8a8784]">
+                                · {post.createdAt}
+                            </span>
+                        </div>
+                        {authUser?.id === post.userId && (
+                            <button
+                                onClick={handleDelete}
+                                disabled={processing}
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8a8784] transition-colors hover:bg-[#eae4dc] hover:text-[#b36b09]"
+                                aria-label="削除"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* 本文 */}
+                    <p className="mt-1 text-base leading-6 break-words whitespace-pre-wrap text-[#2b2a28]">
                         {post.content}
                     </p>
-                </div>
-                {authUser?.id === post.userId && (
-                    <button
-                        onClick={handleDelete}
-                        disabled={processing}
-                        className="shrink-0 text-muted-foreground hover:text-destructive"
-                        aria-label="削除"
-                    >
-                        <Trash2 size={14} />
-                    </button>
-                )}
-            </div>
 
-            <div className="mt-2 flex items-center gap-1">
-                {authUser ? (
-                    <button
-                        onClick={handleLike}
-                        disabled={processing}
-                        className={`flex items-center gap-1 text-xs transition-colors ${
-                            post.likedByAuthUser
-                                ? 'text-red-500'
-                                : 'text-muted-foreground hover:text-red-500'
-                        }`}
-                        aria-label="いいね"
-                    >
-                        <Heart
-                            size={14}
-                            fill={
-                                post.likedByAuthUser ? 'currentColor' : 'none'
-                            }
-                        />
-                        {post.likesCount}
-                    </button>
-                ) : (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Heart size={14} />
-                        {post.likesCount}
-                    </span>
-                )}
+                    {/* アクション行 */}
+                    <div className="mt-3 flex items-center gap-6">
+                        {/* リプライ（ダミー） */}
+                        <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
+                            <MessageCircle size={16} />
+                        </span>
+
+                        {/* リツイート（ダミー） */}
+                        <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
+                            <Repeat2 size={18} />
+                        </span>
+
+                        {/* いいね */}
+                        {authUser ? (
+                            <button
+                                onClick={handleLike}
+                                disabled={processing}
+                                className={`flex items-center gap-1.5 text-sm transition-colors disabled:opacity-50 ${
+                                    post.likedByAuthUser
+                                        ? 'text-[#b36b09]'
+                                        : 'text-[#8a8784] hover:text-[#b36b09]'
+                                }`}
+                                aria-label="いいね"
+                            >
+                                <Heart
+                                    size={16}
+                                    fill={
+                                        post.likedByAuthUser
+                                            ? 'currentColor'
+                                            : 'none'
+                                    }
+                                />
+                                <span>{post.likesCount}</span>
+                            </button>
+                        ) : (
+                            <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
+                                <Heart size={16} />
+                                <span>{post.likesCount}</span>
+                            </span>
+                        )}
+
+                        {/* シェア（ダミー） */}
+                        <span className="flex items-center text-sm text-[#8a8784]">
+                            <Share size={16} />
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     );

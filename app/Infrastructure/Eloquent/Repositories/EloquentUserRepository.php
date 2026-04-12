@@ -34,6 +34,7 @@ class EloquentUserRepository implements UserRepositoryInterface
         return new UserEntity(
             id: $model->id,
             name: $model->name,
+            handle: $model->handle,
             email: $model->email,
             bio: $model->bio,
             postsCount: $model->posts_count,

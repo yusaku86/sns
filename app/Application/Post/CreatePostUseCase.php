@@ -13,12 +13,13 @@ class CreatePostUseCase
         private PostRepositoryInterface $postRepository,
     ) {}
 
-    public function execute(string $userId, string $userName, string $content): Post
+    public function execute(string $userId, string $userName, string $userHandle, string $content): Post
     {
         $post = new Post(
             id: (string) Str::uuid(),
             userId: $userId,
             userName: $userName,
+            userHandle: $userHandle,
             content: $content,
             createdAt: new DateTimeImmutable,
             likesCount: 0,

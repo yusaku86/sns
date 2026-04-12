@@ -6,6 +6,7 @@ it('ユーザーエンティティを生成できる', function () {
     $user = new User(
         id: 'uuid-1',
         name: 'テストユーザー',
+        handle: 'test_user',
         email: 'test@example.com',
         bio: '自己紹介文',
         postsCount: 10,
@@ -16,6 +17,7 @@ it('ユーザーエンティティを生成できる', function () {
 
     expect($user->id)->toBe('uuid-1')
         ->and($user->name)->toBe('テストユーザー')
+        ->and($user->handle)->toBe('test_user')
         ->and($user->email)->toBe('test@example.com')
         ->and($user->bio)->toBe('自己紹介文')
         ->and($user->postsCount)->toBe(10)
@@ -28,6 +30,7 @@ it('bioはnullを許容する', function () {
     $user = new User(
         id: 'uuid-1',
         name: 'テストユーザー',
+        handle: 'test_user',
         email: 'test@example.com',
         bio: null,
         postsCount: 0,

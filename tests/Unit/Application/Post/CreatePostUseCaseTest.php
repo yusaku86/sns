@@ -8,10 +8,11 @@ it('投稿を作成できる', function () {
     $repository->shouldReceive('save')->once();
 
     $useCase = new CreatePostUseCase($repository);
-    $post = $useCase->execute('uuid-user-1', 'テストユーザー', 'テスト投稿内容');
+    $post = $useCase->execute('uuid-user-1', 'テストユーザー', 'test_user', 'テスト投稿内容');
 
     expect($post->userId)->toBe('uuid-user-1')
         ->and($post->userName)->toBe('テストユーザー')
+        ->and($post->userHandle)->toBe('test_user')
         ->and($post->content)->toBe('テスト投稿内容')
         ->and($post->likesCount)->toBe(0)
         ->and($post->likedByAuthUser)->toBeFalse()

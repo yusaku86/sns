@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
-#[Fillable(['name', 'email', 'password', 'bio', 'current_team_id'])]
+#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'current_team_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -25,7 +25,13 @@ class User extends Authenticatable
     protected static function boot(): void
     {
         parent::boot();
-        static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
+        static::creating(function ($model) {
+            $model->id ??= (string) Str::uuid();
+            if (empty($model->handle)) {
+                $base = preg_replace('/[^a-z0-9_]/', '', strtolower(explode('@', $model->email)[0])) ?: 'user';
+                $model->handle = $base.'_'.substr(str_replace('-', '', (string) Str::uuid()), 0, 6);
+            }
+        });
     }
 
     protected function casts(): array
