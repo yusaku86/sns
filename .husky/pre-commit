@@ -17,6 +17,15 @@ if [ -n "$STAGED_PHP" ]; then
         exit 1
     fi
     echo "[OK] PHP Pint passed."
+
+    echo "> LaraStan: checking staged PHP files..."
+    php vendor/bin/phpstan analyse --memory-limit=2G
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "[FAILED] LaraStan check failed."
+        exit 1
+    fi
+    echo "[OK] LaraStan passed."
 fi
 
 # -------------------------------------------------------

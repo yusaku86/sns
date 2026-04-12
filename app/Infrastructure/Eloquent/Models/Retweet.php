@@ -7,6 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+/**
+ * @property string $id
+ * @property string $user_id
+ * @property string $post_id
+ * @property string|null $created_at
+ * @property-read Post $post
+ * @property-read User $user
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet wherePostId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Retweet whereUserId($value)
+ *
+ * @mixin \Eloquent
+ */
 #[Fillable(['id', 'user_id', 'post_id'])]
 class Retweet extends Model
 {

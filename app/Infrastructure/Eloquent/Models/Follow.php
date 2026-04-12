@@ -7,6 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
+/**
+ * @property string $id
+ * @property string $follower_id
+ * @property string $following_id
+ * @property string|null $created_at
+ * @property-read User $follower
+ * @property-read User $following
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow whereFollowerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow whereFollowingId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow whereId($value)
+ *
+ * @mixin \Eloquent
+ */
 #[Fillable(['id', 'follower_id', 'following_id'])]
 class Follow extends Model
 {
