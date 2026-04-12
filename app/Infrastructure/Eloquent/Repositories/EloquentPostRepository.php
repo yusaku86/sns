@@ -92,6 +92,21 @@ class EloquentPostRepository implements PostRepositoryInterface
         PostModel::destroy($id);
     }
 
+    public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20): array
+    {
+        /** @var Collection<int, PostModel> $posts */
+        $posts = PostModel::with(['user', 'hashtags'])
+            ->withCount(['likes', 'replies', 'retweets'])
+            ->where('user_id', $userId)
+            ->latest()
+            ->limit($limit)
+            ->get();
+
+        return $posts
+            ->map(fn (PostModel $model) => $this->toEntity($model, $authUserId))
+            ->all();
+    }
+
     public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20): array
     {
         $hashtag = HashtagModel::where('name', $hashtagName)->first();

@@ -70,7 +70,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'current_team_id'])]
+#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'header_image', 'current_team_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {

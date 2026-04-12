@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Eloquent\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -28,6 +29,8 @@ use Illuminate\Support\Str;
 #[Fillable(['id', 'user_id', 'post_id'])]
 class Like extends Model
 {
+    use HasFactory;
+
     public $incrementing = false;
 
     public $timestamps = false;

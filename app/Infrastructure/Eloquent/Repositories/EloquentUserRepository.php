@@ -37,10 +37,12 @@ class EloquentUserRepository implements UserRepositoryInterface
             handle: $model->handle,
             email: $model->email,
             bio: $model->bio,
+            headerImageUrl: $model->header_image,
             postsCount: $model->posts_count,
             followersCount: $model->followers_count,
             followingCount: $model->followings_count,
             isFollowedByAuthUser: $isFollowedByAuthUser,
+            createdAt: $model->created_at ? new \DateTimeImmutable($model->created_at) : null,
         );
     }
 }

@@ -18,6 +18,17 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
             ->all();
     }
 
+    public function getByUserId(string $userId, int $limit = 20): array
+    {
+        return ReplyModel::with(['user', 'post.user'])
+            ->where('user_id', $userId)
+            ->latest()
+            ->limit($limit)
+            ->get()
+            ->map(fn ($model) => $this->toEntityWithPost($model))
+            ->all();
+    }
+
     public function save(ReplyEntity $reply): void
     {
         ReplyModel::create([
@@ -38,6 +49,22 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
             userHandle: $model->user->handle,
             content: $model->content,
             createdAt: new \DateTimeImmutable($model->created_at),
+        );
+    }
+
+    private function toEntityWithPost(ReplyModel $model): ReplyEntity
+    {
+        return new ReplyEntity(
+            id: $model->id,
+            postId: $model->post_id,
+            userId: $model->user_id,
+            userName: $model->user->name,
+            userHandle: $model->user->handle,
+            content: $model->content,
+            createdAt: new \DateTimeImmutable($model->created_at),
+            postContent: $model->post->content,
+            postUserName: $model->post->user->name,
+            postUserHandle: $model->post->user->handle,
         );
     }
 }
