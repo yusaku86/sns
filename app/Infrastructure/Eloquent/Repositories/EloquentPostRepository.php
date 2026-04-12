@@ -70,6 +70,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             id: $model->id,
             userId: $model->user_id,
             userName: $model->user->name,
+            userHandle: $model->user->handle,
             content: $model->content,
             createdAt: new \DateTimeImmutable($model->created_at),
             likesCount: $model->likes_count,

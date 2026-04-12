@@ -21,6 +21,7 @@ class PostController extends Controller
         $this->createPost->execute(
             userId: $request->user()->id,
             userName: $request->user()->name,
+            userHandle: $request->user()->handle,
             content: $request->validated('content'),
         );
 
