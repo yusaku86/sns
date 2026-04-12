@@ -11,6 +11,9 @@ type Post = {
     createdAt: string;
     likesCount: number;
     likedByAuthUser: boolean;
+    retweetId?: string | null;
+    retweetedByUserName?: string | null;
+    retweetedByUserHandle?: string | null;
 };
 
 export default function Explore({ posts }: { posts: Post[] }) {
@@ -29,7 +32,10 @@ export default function Explore({ posts }: { posts: Post[] }) {
                         </p>
                     ) : (
                         posts.map((post) => (
-                            <PostCard key={post.id} post={post} />
+                            <PostCard
+                                key={post.retweetId ?? post.id}
+                                post={post}
+                            />
                         ))
                     )}
                 </div>

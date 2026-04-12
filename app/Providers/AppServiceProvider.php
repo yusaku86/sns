@@ -6,11 +6,13 @@ use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
+use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Infrastructure\Eloquent\Repositories\EloquentFollowRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentLikeRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentPostRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentReplyRepository;
+use App\Infrastructure\Eloquent\Repositories\EloquentRetweetRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentUserRepository;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LikeRepositoryInterface::class, EloquentLikeRepository::class);
         $this->app->bind(FollowRepositoryInterface::class, EloquentFollowRepository::class);
         $this->app->bind(ReplyRepositoryInterface::class, EloquentReplyRepository::class);
+        $this->app->bind(RetweetRepositoryInterface::class, EloquentRetweetRepository::class);
     }
 
     /**

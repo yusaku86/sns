@@ -2,6 +2,10 @@ import { Link, useForm, usePage } from '@inertiajs/react';
 import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
 import { store as likePost, destroy as unlikePost } from '@/routes/likes';
 import { show as showPost, destroy as destroyPost } from '@/routes/posts';
+import {
+    store as retweetPost,
+    destroy as unretweetPost,
+} from '@/routes/retweets';
 
 type Post = {
     id: string;
@@ -13,6 +17,11 @@ type Post = {
     likesCount: number;
     likedByAuthUser: boolean;
     repliesCount: number;
+    retweetsCount: number;
+    retweetedByAuthUser: boolean;
+    retweetId?: string | null;
+    retweetedByUserName?: string | null;
+    retweetedByUserHandle?: string | null;
 };
 
 type AuthUser = { id: string } | null;
@@ -31,6 +40,14 @@ export default function PostCard({ post }: { post: Post }) {
         }
     }
 
+    function handleRetweet() {
+        if (post.retweetedByAuthUser) {
+            sendDelete(unretweetPost.url(post.id));
+        } else {
+            sendPost(retweetPost.url(post.id));
+        }
+    }
+
     function handleDelete() {
         if (confirm('この投稿を削除しますか？')) {
             sendDelete(destroyPost.url(post.id));
@@ -41,6 +58,14 @@ export default function PostCard({ post }: { post: Post }) {
 
     return (
         <div className="border-b border-[#E5E7EB] p-4 transition-colors hover:bg-[#eae4dc]">
+            {post.retweetedByUserName && (
+                <div className="mb-2 flex items-center gap-1.5 text-xs text-[#8a8784]">
+                    <Repeat2 size={13} />
+                    <span>
+                        {post.retweetedByUserName}さんがリツイートしました
+                    </span>
+                </div>
+            )}
             <div className="flex gap-3">
                 {/* アバター 48px */}
                 <div
@@ -93,10 +118,27 @@ export default function PostCard({ post }: { post: Post }) {
                             <span>{post.repliesCount}</span>
                         </Link>
 
-                        {/* リツイート（ダミー） */}
-                        <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
-                            <Repeat2 size={18} />
-                        </span>
+                        {/* リツイート */}
+                        {authUser ? (
+                            <button
+                                onClick={handleRetweet}
+                                disabled={processing}
+                                className={`flex items-center gap-1.5 text-sm transition-colors disabled:opacity-50 ${
+                                    post.retweetedByAuthUser
+                                        ? 'text-[#3a6c72]'
+                                        : 'text-[#8a8784] hover:text-[#3a6c72]'
+                                }`}
+                                aria-label="リツイート"
+                            >
+                                <Repeat2 size={18} />
+                                <span>{post.retweetsCount}</span>
+                            </button>
+                        ) : (
+                            <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
+                                <Repeat2 size={18} />
+                                <span>{post.retweetsCount}</span>
+                            </span>
+                        )}
 
                         {/* いいね */}
                         {authUser ? (
