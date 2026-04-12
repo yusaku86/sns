@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\HashtagController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReplyController;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/explore', [ExploreController::class, 'index'])->name('explore');
 Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
 Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+Route::get('/hashtags/{hashtag}', [HashtagController::class, 'show'])->name('hashtags.show');
 
 // 認証必要
 Route::middleware('auth')->group(function () {

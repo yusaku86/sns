@@ -17,4 +17,7 @@ interface PostRepositoryInterface
     public function save(Post $post): void;
 
     public function delete(string $id): void;
+
+    /** @return Post[] */
+    public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20): array;
 }

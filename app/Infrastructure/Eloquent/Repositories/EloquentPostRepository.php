@@ -5,14 +5,16 @@ namespace App\Infrastructure\Eloquent\Repositories;
 use App\Domain\Post\Entities\Post as PostEntity;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\Follow;
+use App\Infrastructure\Eloquent\Models\Hashtag as HashtagModel;
 use App\Infrastructure\Eloquent\Models\Post as PostModel;
 use App\Infrastructure\Eloquent\Models\Retweet as RetweetModel;
+use Illuminate\Support\Collection;
 
 class EloquentPostRepository implements PostRepositoryInterface
 {
     public function findById(string $id, ?string $authUserId = null): ?PostEntity
     {
-        $model = PostModel::with('user')->withCount(['likes', 'replies', 'retweets'])->find($id);
+        $model = PostModel::with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets'])->find($id);
 
         if (! $model) {
             return null;
@@ -26,7 +28,7 @@ class EloquentPostRepository implements PostRepositoryInterface
         $followingIds = Follow::where('follower_id', $userId)
             ->pluck('following_id');
 
-        $posts = PostModel::with('user')
+        $posts = PostModel::with(['user', 'hashtags'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->whereIn('user_id', $followingIds)
             ->latest()
@@ -36,7 +38,7 @@ class EloquentPostRepository implements PostRepositoryInterface
 
         $retweets = RetweetModel::with([
             'user',
-            'post' => fn ($q) => $q->with('user')->withCount(['likes', 'replies', 'retweets']),
+            'post' => fn ($q) => $q->with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets']),
         ])
             ->whereIn('user_id', $followingIds)
             ->latest()
@@ -53,7 +55,7 @@ class EloquentPostRepository implements PostRepositoryInterface
 
     public function getAll(?string $authUserId = null, int $limit = 20): array
     {
-        $posts = PostModel::with('user')
+        $posts = PostModel::with(['user', 'hashtags'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->latest()
             ->limit($limit)
@@ -62,7 +64,7 @@ class EloquentPostRepository implements PostRepositoryInterface
 
         $retweets = RetweetModel::with([
             'user',
-            'post' => fn ($q) => $q->with('user')->withCount(['likes', 'replies', 'retweets']),
+            'post' => fn ($q) => $q->with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets']),
         ])
             ->latest()
             ->limit($limit)
@@ -88,6 +90,27 @@ class EloquentPostRepository implements PostRepositoryInterface
     public function delete(string $id): void
     {
         PostModel::destroy($id);
+    }
+
+    public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20): array
+    {
+        $hashtag = HashtagModel::where('name', $hashtagName)->first();
+
+        if (! $hashtag) {
+            return [];
+        }
+
+        /** @var Collection<int, PostModel> $posts */
+        $posts = $hashtag->posts()
+            ->with(['user', 'hashtags'])
+            ->withCount(['likes', 'replies', 'retweets'])
+            ->latest()
+            ->limit($limit)
+            ->get();
+
+        return $posts
+            ->map(fn (PostModel $model) => $this->toEntity($model, $authUserId))
+            ->all();
     }
 
     private function toEntityFromRetweet(RetweetModel $retweet, ?string $authUserId): PostEntity
@@ -118,6 +141,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             retweetedByUserName: $retweet->user->name,
             retweetedByUserHandle: $retweet->user->handle,
             retweetedAt: new \DateTimeImmutable($retweet->created_at),
+            hashtags: $model->hashtags->pluck('name')->all(),
         );
     }
 
@@ -143,6 +167,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             repliesCount: $model->replies_count,
             retweetsCount: $model->retweets_count,
             retweetedByAuthUser: $retweetedByAuthUser,
+            hashtags: $model->hashtags->pluck('name')->all(),
         );
     }
 }
