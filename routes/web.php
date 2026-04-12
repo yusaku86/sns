@@ -4,6 +4,7 @@ use App\Http\Controllers\ExploreController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserController;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 // 認証不要
 Route::get('/explore', [ExploreController::class, 'index'])->name('explore');
 Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
 
 // 認証必要
 Route::middleware('auth')->group(function () {
@@ -20,6 +22,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::post('/posts/{post}/replies', [ReplyController::class, 'store'])->name('replies.store');
 
     Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store');
     Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('likes.destroy');

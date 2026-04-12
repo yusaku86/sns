@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['id', 'user_id', 'content'])]
-class Post extends Model
+#[Fillable(['id', 'post_id', 'user_id', 'content'])]
+class Reply extends Model
 {
     use HasFactory;
 
@@ -24,18 +23,13 @@ class Post extends Model
         static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
     }
 
+    public function post(): BelongsTo
+    {
+        return $this->belongsTo(Post::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function likes(): HasMany
-    {
-        return $this->hasMany(Like::class);
-    }
-
-    public function replies(): HasMany
-    {
-        return $this->hasMany(Reply::class);
     }
 }

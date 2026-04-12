@@ -44,6 +44,14 @@ REST API を作らず、Laravelのコントローラーから `Inertia::render()
 - いいね / いいね取り消し
 - いいね数の表示
 
+### 返信（リプライ）
+- ログイン済みユーザーは任意の投稿に対して返信を作成できる
+- 返信は最大140文字のテキストのみ
+- 返信は元の投稿に紐付けて表示される（スレッド形式）
+- 返信の返信（ネスト）は対象外（フェーズ1）
+- 投稿カードに返信数を表示する
+- 投稿詳細画面で返信一覧と返信フォームを表示する
+
 ---
 
 ## データモデル
@@ -84,6 +92,16 @@ REST API を作らず、Laravelのコントローラーから `Inertia::render()
 | following_id | bigint | FK → users（フォローされる側） |
 | created_at | timestamp | |
 
+### replies
+| カラム | 型 | 備考 |
+|--------|----|------|
+| id | uuid | PK |
+| post_id | uuid | FK → posts |
+| user_id | uuid | FK → users |
+| content | varchar(140) | |
+| created_at | timestamp | |
+| updated_at | timestamp | |
+
 ---
 
 ## 画面一覧
@@ -95,6 +113,7 @@ REST API を作らず、Laravelのコントローラーから `Inertia::render()
 | タイムライン | `/` | 必要 |
 | 全体投稿一覧 | `/explore` | 不要 |
 | プロフィール | `/users/{id}` | 不要 |
+| 投稿詳細 | `/posts/{post}` | 不要（返信投稿は必要） |
 
 ---
 
@@ -125,6 +144,12 @@ Inertia.js 構成のため、すべて `web.php` で定義する。
 |----------|------|------|------|
 | POST | `/posts/{post}/like` | 必要 | いいね |
 | DELETE | `/posts/{post}/like` | 必要 | いいね取り消し |
+
+### 返信
+| メソッド | パス | 認証 | 概要 |
+|----------|------|------|------|
+| GET | `/posts/{post}` | 不要 | 投稿詳細 + 返信一覧 |
+| POST | `/posts/{post}/replies` | 必要 | 返信作成 |
 
 ### ユーザー
 | メソッド | パス | 認証 | 概要 |

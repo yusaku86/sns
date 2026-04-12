@@ -1,7 +1,7 @@
-import { useForm, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
 import { store as likePost, destroy as unlikePost } from '@/routes/likes';
-import { destroy as destroyPost } from '@/routes/posts';
+import { show as showPost, destroy as destroyPost } from '@/routes/posts';
 
 type Post = {
     id: string;
@@ -12,6 +12,7 @@ type Post = {
     createdAt: string;
     likesCount: number;
     likedByAuthUser: boolean;
+    repliesCount: number;
 };
 
 type AuthUser = { id: string } | null;
@@ -83,10 +84,14 @@ export default function PostCard({ post }: { post: Post }) {
 
                     {/* アクション行 */}
                     <div className="mt-3 flex items-center gap-6">
-                        {/* リプライ（ダミー） */}
-                        <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
+                        {/* リプライ */}
+                        <Link
+                            href={showPost.url(post.id)}
+                            className="flex items-center gap-1.5 text-sm text-[#8a8784] transition-colors hover:text-[#3a6c72]"
+                        >
                             <MessageCircle size={16} />
-                        </span>
+                            <span>{post.repliesCount}</span>
+                        </Link>
 
                         {/* リツイート（ダミー） */}
                         <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
