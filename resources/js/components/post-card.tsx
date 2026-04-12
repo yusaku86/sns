@@ -1,5 +1,6 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
+import { show as showHashtag } from '@/routes/hashtags';
 import { store as likePost, destroy as unlikePost } from '@/routes/likes';
 import { show as showPost, destroy as destroyPost } from '@/routes/posts';
 import {
@@ -22,6 +23,7 @@ type Post = {
     retweetId?: string | null;
     retweetedByUserName?: string | null;
     retweetedByUserHandle?: string | null;
+    hashtags?: string[];
 };
 
 type AuthUser = { id: string } | null;
@@ -104,7 +106,20 @@ export default function PostCard({ post }: { post: Post }) {
 
                     {/* 本文 */}
                     <p className="mt-1 text-base leading-6 break-words whitespace-pre-wrap text-[#2b2a28]">
-                        {post.content}
+                        {post.content.split(/(#[\w\p{L}]+)/u).map((part, i) =>
+                            part.startsWith('#') ? (
+                                <Link
+                                    key={i}
+                                    href={showHashtag.url(part.slice(1))}
+                                    className="text-[#3a6c72] hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {part}
+                                </Link>
+                            ) : (
+                                part
+                            ),
+                        )}
                     </p>
 
                     {/* アクション行 */}

@@ -1,13 +1,17 @@
 <?php
 
 use App\Application\Post\CreatePostUseCase;
+use App\Domain\Hashtag\Repositories\HashtagRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 
 it('投稿を作成できる', function () {
-    $repository = mock(PostRepositoryInterface::class);
-    $repository->shouldReceive('save')->once();
+    $postRepository = mock(PostRepositoryInterface::class);
+    $postRepository->shouldReceive('save')->once();
 
-    $useCase = new CreatePostUseCase($repository);
+    $hashtagRepository = mock(HashtagRepositoryInterface::class);
+    $hashtagRepository->shouldNotReceive('syncToPost');
+
+    $useCase = new CreatePostUseCase($postRepository, $hashtagRepository);
     $post = $useCase->execute('uuid-user-1', 'テストユーザー', 'test_user', 'テスト投稿内容');
 
     expect($post->userId)->toBe('uuid-user-1')
@@ -17,4 +21,43 @@ it('投稿を作成できる', function () {
         ->and($post->likesCount)->toBe(0)
         ->and($post->likedByAuthUser)->toBeFalse()
         ->and($post->id)->not->toBeEmpty();
+});
+
+it('ハッシュタグ付き投稿を作成するとハッシュタグが保存される', function () {
+    $postRepository = mock(PostRepositoryInterface::class);
+    $postRepository->shouldReceive('save')->once();
+
+    $hashtagRepository = mock(HashtagRepositoryInterface::class);
+    $hashtagRepository->shouldReceive('syncToPost')
+        ->once()
+        ->withArgs(fn (array $names, string $postId) => $names === ['Laravel', 'PHP'] && $postId !== '');
+
+    $useCase = new CreatePostUseCase($postRepository, $hashtagRepository);
+    $post = $useCase->execute('uuid-user-1', 'テストユーザー', 'test_user', '#Laravel と #PHP の話');
+
+    expect($post->content)->toBe('#Laravel と #PHP の話');
+});
+
+it('同じハッシュタグが複数あっても重複せずに保存される', function () {
+    $postRepository = mock(PostRepositoryInterface::class);
+    $postRepository->shouldReceive('save')->once();
+
+    $hashtagRepository = mock(HashtagRepositoryInterface::class);
+    $hashtagRepository->shouldReceive('syncToPost')
+        ->once()
+        ->withArgs(fn (array $names, string $postId) => $names === ['Laravel']);
+
+    $useCase = new CreatePostUseCase($postRepository, $hashtagRepository);
+    $useCase->execute('uuid-user-1', 'テストユーザー', 'test_user', '#Laravel #Laravel #Laravel');
+});
+
+it('ハッシュタグなしの投稿ではsyncToPostは呼ばれない', function () {
+    $postRepository = mock(PostRepositoryInterface::class);
+    $postRepository->shouldReceive('save')->once();
+
+    $hashtagRepository = mock(HashtagRepositoryInterface::class);
+    $hashtagRepository->shouldNotReceive('syncToPost');
+
+    $useCase = new CreatePostUseCase($postRepository, $hashtagRepository);
+    $useCase->execute('uuid-user-1', 'テストユーザー', 'test_user', 'ハッシュタグなしの投稿');
 });
