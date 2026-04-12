@@ -38,4 +38,9 @@ class Post extends Model
     {
         return $this->hasMany(Reply::class);
     }
+
+    public function retweets(): HasMany
+    {
+        return $this->hasMany(Retweet::class);
+    }
 }

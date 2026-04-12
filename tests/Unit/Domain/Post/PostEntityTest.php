@@ -27,6 +27,36 @@ it('投稿エンティティを生成できる', function () {
         ->and($post->repliesCount)->toBe(0);
 });
 
+it('リツイート情報付きの投稿エンティティを生成できる', function () {
+    $now = new DateTimeImmutable;
+    $retweetedAt = new DateTimeImmutable('2026-04-12 10:00:00');
+
+    $post = new Post(
+        id: 'uuid-1',
+        userId: 'uuid-user-1',
+        userName: '投稿者',
+        userHandle: 'poster',
+        content: '元の投稿',
+        createdAt: $now,
+        likesCount: 0,
+        likedByAuthUser: false,
+        retweetId: 'uuid-rt-1',
+        retweetedByUserName: 'リツイーター',
+        retweetedByUserHandle: 'retweeter',
+        retweetedAt: $retweetedAt,
+    );
+
+    expect($post->retweetId)->toBe('uuid-rt-1')
+        ->and($post->retweetedByUserName)->toBe('リツイーター')
+        ->and($post->retweetedByUserHandle)->toBe('retweeter')
+        ->and($post->retweetedAt)->toBe($retweetedAt);
+
+    $json = $post->jsonSerialize();
+    expect($json['retweetId'])->toBe('uuid-rt-1')
+        ->and($json['retweetedByUserName'])->toBe('リツイーター')
+        ->and($json['retweetedByUserHandle'])->toBe('retweeter');
+});
+
 it('いいね済みフラグがtrueの投稿エンティティを生成できる', function () {
     $post = new Post(
         id: 'uuid-1',

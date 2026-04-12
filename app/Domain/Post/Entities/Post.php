@@ -17,6 +17,12 @@ class Post implements JsonSerializable
         public readonly int $likesCount,
         public readonly bool $likedByAuthUser,
         public readonly int $repliesCount = 0,
+        public readonly int $retweetsCount = 0,
+        public readonly bool $retweetedByAuthUser = false,
+        public readonly ?string $retweetId = null,
+        public readonly ?string $retweetedByUserName = null,
+        public readonly ?string $retweetedByUserHandle = null,
+        public readonly ?DateTimeImmutable $retweetedAt = null,
     ) {}
 
     public function jsonSerialize(): array
@@ -31,6 +37,11 @@ class Post implements JsonSerializable
             'likesCount' => $this->likesCount,
             'likedByAuthUser' => $this->likedByAuthUser,
             'repliesCount' => $this->repliesCount,
+            'retweetsCount' => $this->retweetsCount,
+            'retweetedByAuthUser' => $this->retweetedByAuthUser,
+            'retweetId' => $this->retweetId,
+            'retweetedByUserName' => $this->retweetedByUserName,
+            'retweetedByUserHandle' => $this->retweetedByUserHandle,
         ];
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\FollowController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\RetweetController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserController;
@@ -26,6 +27,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store');
     Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('likes.destroy');
+
+    Route::post('/posts/{post}/retweet', [RetweetController::class, 'store'])->name('retweets.store');
+    Route::delete('/posts/{post}/retweet', [RetweetController::class, 'destroy'])->name('retweets.destroy');
 
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/follow', [FollowController::class, 'store'])->name('follows.store');
