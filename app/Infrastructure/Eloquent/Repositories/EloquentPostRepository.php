@@ -11,7 +11,7 @@ class EloquentPostRepository implements PostRepositoryInterface
 {
     public function findById(string $id, ?string $authUserId = null): ?PostEntity
     {
-        $model = PostModel::with('user')->withCount('likes')->find($id);
+        $model = PostModel::with('user')->withCount(['likes', 'replies'])->find($id);
 
         if (! $model) {
             return null;
@@ -26,7 +26,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->pluck('following_id');
 
         return PostModel::with('user')
-            ->withCount('likes')
+            ->withCount(['likes', 'replies'])
             ->whereIn('user_id', $followingIds)
             ->latest()
             ->limit($limit)
@@ -38,7 +38,7 @@ class EloquentPostRepository implements PostRepositoryInterface
     public function getAll(?string $authUserId = null, int $limit = 20): array
     {
         return PostModel::with('user')
-            ->withCount('likes')
+            ->withCount(['likes', 'replies'])
             ->latest()
             ->limit($limit)
             ->get()
@@ -75,6 +75,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             createdAt: new \DateTimeImmutable($model->created_at),
             likesCount: $model->likes_count,
             likedByAuthUser: $likedByAuthUser,
+            repliesCount: $model->replies_count,
         );
     }
 }

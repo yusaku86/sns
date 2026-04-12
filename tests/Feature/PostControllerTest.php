@@ -1,7 +1,45 @@
 <?php
 
 use App\Infrastructure\Eloquent\Models\Post;
+use App\Infrastructure\Eloquent\Models\Reply;
 use App\Infrastructure\Eloquent\Models\User;
+
+it('投稿詳細ページを表示できる', function () {
+    $post = Post::factory()->create();
+
+    $this->withoutVite()
+        ->get(route('posts.show', $post))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('posts/show')
+            ->has('post')
+            ->has('replies')
+        );
+});
+
+it('認証済みユーザーは自分のいいね状態が含まれた投稿詳細を取得できる', function () {
+    $user = User::factory()->create();
+    $post = Post::factory()->create();
+
+    $this->withoutVite()
+        ->actingAs($user)
+        ->get(route('posts.show', $post))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('posts/show'));
+});
+
+it('投稿詳細ページで返信一覧が表示される', function () {
+    $post = Post::factory()->create();
+    Reply::factory()->count(3)->create(['post_id' => $post->id]);
+
+    $this->withoutVite()
+        ->get(route('posts.show', $post))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('posts/show')
+            ->has('replies', 3)
+        );
+});
 
 it('ログイン済みユーザーは投稿を作成できる', function () {
     $user = User::factory()->create();

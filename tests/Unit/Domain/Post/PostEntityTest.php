@@ -23,7 +23,8 @@ it('投稿エンティティを生成できる', function () {
         ->and($post->content)->toBe('テスト投稿内容')
         ->and($post->createdAt)->toBe($now)
         ->and($post->likesCount)->toBe(3)
-        ->and($post->likedByAuthUser)->toBeFalse();
+        ->and($post->likedByAuthUser)->toBeFalse()
+        ->and($post->repliesCount)->toBe(0);
 });
 
 it('いいね済みフラグがtrueの投稿エンティティを生成できる', function () {
