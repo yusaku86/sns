@@ -49,16 +49,6 @@ services:
             retries: 3
             timeout: 5s
 
-    # MCPサーバ
-    mcp:
-        build: ../mcp-server
-        ports:
-        - "3001:3001"
-        volumes:
-        - ../sns:/app/project
-        environment:
-        - OPENAI_API_KEY=xxx
-
 networks:
     sail:
         driver: bridge
