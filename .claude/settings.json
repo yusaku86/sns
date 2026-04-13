@@ -1,4 +1,10 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__miro__context_get",
+      "Bash(./vendor/bin/sail artisan:*)"
+    ]
+  },
   "enabledPlugins": {
     "github@claude-plugins-official": true
   }
