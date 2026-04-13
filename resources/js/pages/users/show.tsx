@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react';
 import { CalendarDays, Pencil } from 'lucide-react';
 import { useState } from 'react';
+import EditProfileModal from '@/components/edit-profile-modal';
 import FollowButton from '@/components/follow-button';
 import PostCard from '@/components/post-card';
 import RightSidebar from '@/components/right-sidebar';
@@ -12,6 +13,7 @@ type UserProfile = {
     email: string;
     bio: string | null;
     headerImageUrl: string | null;
+    profileImageUrl: string | null;
     postsCount: number;
     followersCount: number;
     followingCount: number;
@@ -48,6 +50,7 @@ type Reply = {
     postContent: string | null;
     postUserName: string | null;
     postUserHandle: string | null;
+    userProfileImageUrl?: string | null;
 };
 
 type AuthUser = { id: string } | null;
@@ -94,12 +97,20 @@ function ReplyWithContext({ reply }: { reply: Reply }) {
 
             {/* リプライ本体 */}
             <div className="flex gap-3">
-                <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
-                    aria-hidden="true"
-                >
-                    {initial}
-                </div>
+                {reply.userProfileImageUrl ? (
+                    <img
+                        src={reply.userProfileImageUrl}
+                        alt={reply.userName}
+                        className="h-10 w-10 shrink-0 rounded-full object-cover"
+                    />
+                ) : (
+                    <div
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
+                        aria-hidden="true"
+                    >
+                        {initial}
+                    </div>
+                )}
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0">
                         <span className="truncate text-sm font-semibold text-[#191816]">
@@ -170,24 +181,31 @@ export default function UserShow({
                     <div className="border-b border-[#E5E7EB] px-4 pb-4">
                         <div className="flex items-end justify-between gap-4">
                             {/* アバター 96px（ヘッダー画像に半分かかる） */}
-                            <div
-                                className="-mt-12 flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-4 border-[#f6f3ee] bg-[#3a6c72] text-2xl font-semibold text-white"
-                                aria-hidden="true"
-                            >
-                                {initial}
+                            <div className="relative z-10 -mt-12 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-[#f6f3ee] bg-[#3a6c72] text-2xl font-semibold text-white">
+                                {user.profileImageUrl ? (
+                                    <img
+                                        src={user.profileImageUrl}
+                                        alt={`${user.name}のプロフィール画像`}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <span aria-hidden="true">{initial}</span>
+                                )}
                             </div>
 
                             {/* ボタン群 */}
                             <div className="flex items-center gap-2 pt-2">
                                 {isOwnProfile ? (
-                                    <button
-                                        type="button"
-                                        className="flex h-9 items-center gap-1.5 rounded-full border border-[#3a6c72] px-4 text-sm font-semibold text-[#3a6c72] transition-colors hover:bg-[#3a6c72]/10"
-                                        aria-label="プロフィールを修正"
-                                    >
-                                        <Pencil size={14} />
-                                        プロフィールを修正
-                                    </button>
+                                    <EditProfileModal user={user}>
+                                        <button
+                                            type="button"
+                                            className="flex h-9 items-center gap-1.5 rounded-full border border-[#3a6c72] px-4 text-sm font-semibold text-[#3a6c72] transition-colors hover:bg-[#3a6c72]/10"
+                                            aria-label="プロフィールを修正"
+                                        >
+                                            <Pencil size={14} />
+                                            プロフィールを修正
+                                        </button>
+                                    </EditProfileModal>
                                 ) : (
                                     authUser && (
                                         <FollowButton

@@ -16,6 +16,8 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:160'],
+            'header_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
         ];
     }
 }

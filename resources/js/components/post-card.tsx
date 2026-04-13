@@ -24,6 +24,7 @@ type Post = {
     retweetedByUserName?: string | null;
     retweetedByUserHandle?: string | null;
     hashtags?: string[];
+    userProfileImageUrl?: string | null;
 };
 
 type AuthUser = { id: string } | null;
@@ -70,12 +71,20 @@ export default function PostCard({ post }: { post: Post }) {
             )}
             <div className="flex gap-3">
                 {/* アバター 48px */}
-                <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
-                    aria-hidden="true"
-                >
-                    {initial}
-                </div>
+                {post.userProfileImageUrl ? (
+                    <img
+                        src={post.userProfileImageUrl}
+                        alt={post.userName}
+                        className="h-12 w-12 shrink-0 rounded-full object-cover"
+                    />
+                ) : (
+                    <div
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
+                        aria-hidden="true"
+                    >
+                        {initial}
+                    </div>
+                )}
 
                 {/* コンテンツ */}
                 <div className="min-w-0 flex-1">

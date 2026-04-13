@@ -1,7 +1,11 @@
 import { useForm, usePage } from '@inertiajs/react';
 import { store } from '@/routes/posts';
 
-type AuthUser = { id: string; name: string } | null;
+type AuthUser = {
+    id: string;
+    name: string;
+    profile_image_url?: string | null;
+} | null;
 
 export default function PostForm() {
     const { auth } = usePage().props as { auth: { user: AuthUser } };
@@ -24,12 +28,20 @@ export default function PostForm() {
         <form onSubmit={handleSubmit} className="border-b border-[#E5E7EB] p-4">
             <div className="flex gap-3">
                 {/* アバター 48px */}
-                <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
-                    aria-hidden="true"
-                >
-                    {initial}
-                </div>
+                {authUser?.profile_image_url ? (
+                    <img
+                        src={authUser.profile_image_url}
+                        alt={authUser.name}
+                        className="h-12 w-12 shrink-0 rounded-full object-cover"
+                    />
+                ) : (
+                    <div
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
+                        aria-hidden="true"
+                    >
+                        {initial}
+                    </div>
+                )}
 
                 {/* 入力エリア */}
                 <div className="min-w-0 flex-1">

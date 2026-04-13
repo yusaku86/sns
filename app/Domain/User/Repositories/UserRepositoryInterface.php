@@ -8,5 +8,5 @@ interface UserRepositoryInterface
 {
     public function findById(string $id, ?string $authUserId = null): ?User;
 
-    public function update(string $id, string $name, ?string $bio): void;
+    public function update(string $id, string $name, ?string $bio, ?string $headerImagePath, ?string $profileImagePath): void;
 }

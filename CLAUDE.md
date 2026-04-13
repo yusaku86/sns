@@ -105,7 +105,8 @@ import { timeline } from '@/routes';
 - **Pest** を使用し `it()` / `test()` 記法で書く
 - Unit Test: `tests/Unit/` — DBに依存しない。UseCaseはRepositoryを `mock()` する
 - Feature Test: `tests/Feature/` — SQLiteインメモリDB使用。認証ルートは `actingAs()` を使用
-- **実装と同時にテストを作成する**（後回し禁止）
+- **テスト駆動開発（TDD）で進める** — 実装コードを書く前にテストを書き、テストが失敗することを確認してから実装する（Red → Green → Refactor）
+- テストを書かずに実装を完了とすることは禁止
 
 ---
 
@@ -161,7 +162,7 @@ import { timeline } from '@/routes';
 - Domain層にLaravelのクラスをimportする
 - `app/Models/` 配下に新規ファイルを作成する（Infrastructure層を使う）
 - フロントエンドからAPIルート（`/api/*`）を叩く
-- テストを書かずに実装を完了とする
+- テストより先に実装コードを書く（TDD違反）
 
 ---
 

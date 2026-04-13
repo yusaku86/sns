@@ -25,6 +25,7 @@ class Post implements JsonSerializable
         public readonly ?DateTimeImmutable $retweetedAt = null,
         /** @var string[] */
         public readonly array $hashtags = [],
+        public readonly ?string $userProfileImageUrl = null,
     ) {}
 
     public function jsonSerialize(): array
@@ -45,6 +46,7 @@ class Post implements JsonSerializable
             'retweetedByUserName' => $this->retweetedByUserName,
             'retweetedByUserHandle' => $this->retweetedByUserHandle,
             'hashtags' => $this->hashtags,
+            'userProfileImageUrl' => $this->userProfileImageUrl,
         ];
     }
 }
