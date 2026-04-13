@@ -5,6 +5,7 @@ namespace App\Infrastructure\Eloquent\Repositories;
 use App\Domain\User\Entities\User as UserEntity;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\User as UserModel;
+use Illuminate\Support\Facades\Storage;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -24,9 +25,19 @@ class EloquentUserRepository implements UserRepositoryInterface
         return $this->toEntity($model, $isFollowed);
     }
 
-    public function update(string $id, string $name, ?string $bio): void
+    public function update(string $id, string $name, ?string $bio, ?string $headerImagePath, ?string $profileImagePath): void
     {
-        UserModel::where('id', $id)->update(['name' => $name, 'bio' => $bio]);
+        $data = ['name' => $name, 'bio' => $bio];
+
+        if ($headerImagePath !== null) {
+            $data['header_image'] = $headerImagePath;
+        }
+
+        if ($profileImagePath !== null) {
+            $data['profile_image'] = $profileImagePath;
+        }
+
+        UserModel::where('id', $id)->update($data);
     }
 
     private function toEntity(UserModel $model, bool $isFollowedByAuthUser): UserEntity
@@ -37,7 +48,8 @@ class EloquentUserRepository implements UserRepositoryInterface
             handle: $model->handle,
             email: $model->email,
             bio: $model->bio,
-            headerImageUrl: $model->header_image,
+            headerImageUrl: $model->header_image ? Storage::disk('public')->url($model->header_image) : null,
+            profileImageUrl: $model->profile_image ? Storage::disk('public')->url($model->profile_image) : null,
             postsCount: $model->posts_count,
             followersCount: $model->followers_count,
             followingCount: $model->followings_count,

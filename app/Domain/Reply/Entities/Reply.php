@@ -18,6 +18,7 @@ class Reply implements JsonSerializable
         public readonly ?string $postContent = null,
         public readonly ?string $postUserName = null,
         public readonly ?string $postUserHandle = null,
+        public readonly ?string $userProfileImageUrl = null,
     ) {}
 
     public function jsonSerialize(): array
@@ -33,6 +34,7 @@ class Reply implements JsonSerializable
             'postContent' => $this->postContent,
             'postUserName' => $this->postUserName,
             'postUserHandle' => $this->postUserHandle,
+            'userProfileImageUrl' => $this->userProfileImageUrl,
         ];
     }
 }

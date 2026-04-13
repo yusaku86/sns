@@ -4,6 +4,8 @@ use App\Infrastructure\Eloquent\Models\Like;
 use App\Infrastructure\Eloquent\Models\Post;
 use App\Infrastructure\Eloquent\Models\Reply;
 use App\Infrastructure\Eloquent\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 it('プロフィールページを表示できる', function () {
     $user = User::factory()->create();
@@ -87,4 +89,66 @@ it('他のユーザーのプロフィールは更新できない', function () {
         ->assertForbidden();
 
     expect($other->fresh()->name)->toBe('変更前');
+});
+
+it('ヘッダー画像をアップロードして更新できる', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->image('header.jpg', 1200, 400);
+
+    $this->actingAs($user)
+        ->put(route('users.update', $user), [
+            'name' => $user->name,
+            'bio' => null,
+            'header_image' => $file,
+        ])
+        ->assertRedirect();
+
+    Storage::disk('public')->assertExists('header_images/'.$file->hashName());
+    expect($user->fresh()->header_image)->toBe('header_images/'.$file->hashName());
+});
+
+it('プロフィール画像をアップロードして更新できる', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->image('avatar.png', 400, 400);
+
+    $this->actingAs($user)
+        ->put(route('users.update', $user), [
+            'name' => $user->name,
+            'bio' => null,
+            'profile_image' => $file,
+        ])
+        ->assertRedirect();
+
+    Storage::disk('public')->assertExists('profile_images/'.$file->hashName());
+    expect($user->fresh()->profile_image)->toBe('profile_images/'.$file->hashName());
+});
+
+it('ヘッダー画像は5MB以上のファイルを拒否する', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->create('header.jpg', 6000, 'image/jpeg');
+
+    $this->actingAs($user)
+        ->put(route('users.update', $user), [
+            'name' => $user->name,
+            'bio' => null,
+            'header_image' => $file,
+        ])
+        ->assertSessionHasErrors('header_image');
+});
+
+it('プロフィール画像は2MB以上のファイルを拒否する', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->create('avatar.jpg', 3000, 'image/jpeg');
+
+    $this->actingAs($user)
+        ->put(route('users.update', $user), [
+            'name' => $user->name,
+            'bio' => null,
+            'profile_image' => $file,
+        ])
+        ->assertSessionHasErrors('profile_image');
 });

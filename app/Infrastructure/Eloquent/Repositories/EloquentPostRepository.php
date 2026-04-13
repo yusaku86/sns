@@ -9,6 +9,7 @@ use App\Infrastructure\Eloquent\Models\Hashtag as HashtagModel;
 use App\Infrastructure\Eloquent\Models\Post as PostModel;
 use App\Infrastructure\Eloquent\Models\Retweet as RetweetModel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class EloquentPostRepository implements PostRepositoryInterface
 {
@@ -157,6 +158,9 @@ class EloquentPostRepository implements PostRepositoryInterface
             retweetedByUserHandle: $retweet->user->handle,
             retweetedAt: new \DateTimeImmutable($retweet->created_at),
             hashtags: $model->hashtags->pluck('name')->all(),
+            userProfileImageUrl: $model->user->profile_image
+                ? Storage::disk('public')->url($model->user->profile_image)
+                : null,
         );
     }
 
@@ -183,6 +187,9 @@ class EloquentPostRepository implements PostRepositoryInterface
             retweetsCount: $model->retweets_count,
             retweetedByAuthUser: $retweetedByAuthUser,
             hashtags: $model->hashtags->pluck('name')->all(),
+            userProfileImageUrl: $model->user->profile_image
+                ? Storage::disk('public')->url($model->user->profile_image)
+                : null,
         );
     }
 }

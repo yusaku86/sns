@@ -6,6 +6,7 @@ use App\Concerns\HasTeams;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -70,7 +72,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'header_image', 'current_team_id'])]
+#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'header_image', 'profile_image', 'current_team_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -79,6 +81,17 @@ class User extends Authenticatable
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    protected $appends = ['profile_image_url'];
+
+    protected function profileImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->profile_image
+                ? Storage::disk('public')->url($this->profile_image)
+                : null,
+        );
+    }
 
     protected static function boot(): void
     {

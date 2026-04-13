@@ -5,6 +5,7 @@ namespace App\Infrastructure\Eloquent\Repositories;
 use App\Domain\Reply\Entities\Reply as ReplyEntity;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\Reply as ReplyModel;
+use Illuminate\Support\Facades\Storage;
 
 class EloquentReplyRepository implements ReplyRepositoryInterface
 {
@@ -49,6 +50,9 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
             userHandle: $model->user->handle,
             content: $model->content,
             createdAt: new \DateTimeImmutable($model->created_at),
+            userProfileImageUrl: $model->user->profile_image
+                ? Storage::disk('public')->url($model->user->profile_image)
+                : null,
         );
     }
 
@@ -65,6 +69,9 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
             postContent: $model->post->content,
             postUserName: $model->post->user->name,
             postUserHandle: $model->post->user->handle,
+            userProfileImageUrl: $model->user->profile_image
+                ? Storage::disk('public')->url($model->user->profile_image)
+                : null,
         );
     }
 }

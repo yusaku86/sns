@@ -7,6 +7,7 @@ use App\Domain\Post\Entities\Post as PostEntity;
 use App\Infrastructure\Eloquent\Models\Like as LikeModel;
 use App\Infrastructure\Eloquent\Models\Post as PostModel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class EloquentLikeRepository implements LikeRepositoryInterface
 {
@@ -79,6 +80,9 @@ class EloquentLikeRepository implements LikeRepositoryInterface
             retweetsCount: $model->retweets_count,
             retweetedByAuthUser: $retweetedByAuthUser,
             hashtags: $model->hashtags->pluck('name')->all(),
+            userProfileImageUrl: $model->user->profile_image
+                ? Storage::disk('public')->url($model->user->profile_image)
+                : null,
         );
     }
 }

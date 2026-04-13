@@ -50,5 +50,6 @@ it('返信エンティティをJSON化できる', function () {
         'postContent' => null,
         'postUserName' => null,
         'postUserHandle' => null,
+        'userProfileImageUrl' => null,
     ]);
 });

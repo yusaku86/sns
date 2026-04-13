@@ -42,6 +42,8 @@ class UserController extends Controller
             authUserId: $request->user()->id,
             name: $request->validated('name'),
             bio: $request->validated('bio'),
+            headerImage: $request->file('header_image'),
+            profileImage: $request->file('profile_image'),
         );
 
         return back();
