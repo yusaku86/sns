@@ -3,6 +3,8 @@ import { CalendarDays, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import EditProfileModal from '@/components/edit-profile-modal';
 import FollowButton from '@/components/follow-button';
+import FollowUserListModal from '@/components/follow-user-list-modal';
+import type { FollowUser } from '@/components/follow-user-list-modal';
 import PostCard from '@/components/post-card';
 import RightSidebar from '@/components/right-sidebar';
 
@@ -10,7 +12,6 @@ type UserProfile = {
     id: string;
     name: string;
     handle: string;
-    email: string;
     bio: string | null;
     headerImageUrl: string | null;
     profileImageUrl: string | null;
@@ -56,6 +57,8 @@ type Reply = {
 type AuthUser = { id: string } | null;
 
 type Tab = 'posts' | 'replies' | 'likes';
+
+type FollowModal = 'followers' | 'following' | null;
 
 function formatJoinDate(createdAt: string | null): string | null {
     if (!createdAt) {
@@ -137,17 +140,22 @@ export default function UserShow({
     posts,
     replies,
     likedPosts,
+    followers,
+    following,
 }: {
     user: UserProfile;
     posts: Post[];
     replies: Reply[];
     likedPosts: Post[];
+    followers: FollowUser[] | undefined;
+    following: FollowUser[] | undefined;
 }) {
     const { auth } = usePage().props as { auth: { user: AuthUser } };
     const authUser = auth?.user;
     const isOwnProfile = authUser?.id === user.id;
 
     const [activeTab, setActiveTab] = useState<Tab>('posts');
+    const [openModal, setOpenModal] = useState<FollowModal>(null);
 
     const initial = user.name.charAt(0).toUpperCase();
     const joinDate = formatJoinDate(user.createdAt);
@@ -252,22 +260,30 @@ export default function UserShow({
                                         投稿
                                     </span>
                                 </div>
-                                <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenModal('followers')}
+                                    className="hover:underline"
+                                >
                                     <span className="text-base font-semibold text-[#191816]">
                                         {user.followersCount}
                                     </span>
                                     <span className="ml-1 text-sm text-[#8a8784]">
                                         フォロワー
                                     </span>
-                                </div>
-                                <div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenModal('following')}
+                                    className="hover:underline"
+                                >
                                     <span className="text-base font-semibold text-[#191816]">
                                         {user.followingCount}
                                     </span>
                                     <span className="ml-1 text-sm text-[#8a8784]">
                                         フォロー中
                                     </span>
-                                </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -344,6 +360,22 @@ export default function UserShow({
                     </div>
                 </aside>
             </div>
+
+            {/* フォロワー/フォロー中モーダル */}
+            <FollowUserListModal
+                title={`${user.name}のフォロワー`}
+                users={followers}
+                authUserId={authUser?.id}
+                open={openModal === 'followers'}
+                onOpenChange={(open) => setOpenModal(open ? 'followers' : null)}
+            />
+            <FollowUserListModal
+                title={`${user.name}のフォロー中`}
+                users={following}
+                authUserId={authUser?.id}
+                open={openModal === 'following'}
+                onOpenChange={(open) => setOpenModal(open ? 'following' : null)}
+            />
         </>
     );
 }

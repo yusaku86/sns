@@ -26,6 +26,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $email
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
+ * @property string|null $profile_image
+ * @property string|null $profile_image_url
  * @property string|null $current_team_id
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes

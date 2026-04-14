@@ -27,7 +27,6 @@ class User implements JsonSerializable
             'id' => $this->id,
             'name' => $this->name,
             'handle' => $this->handle,
-            'email' => $this->email,
             'bio' => $this->bio,
             'headerImageUrl' => $this->headerImageUrl,
             'profileImageUrl' => $this->profileImageUrl,

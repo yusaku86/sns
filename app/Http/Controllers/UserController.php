@@ -32,6 +32,8 @@ class UserController extends Controller
             'posts' => $result['posts'],
             'replies' => $result['replies'],
             'likedPosts' => $result['likedPosts'],
+            'followers' => Inertia::defer(fn () => $result['followers']),
+            'following' => Inertia::defer(fn () => $result['following']),
         ]);
     }
 
