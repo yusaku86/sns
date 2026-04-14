@@ -2,6 +2,7 @@
 
 namespace App\Application\User;
 
+use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
@@ -15,10 +16,11 @@ class GetUserProfileUseCase
         private PostRepositoryInterface $postRepository,
         private ReplyRepositoryInterface $replyRepository,
         private LikeRepositoryInterface $likeRepository,
+        private FollowRepositoryInterface $followRepository,
     ) {}
 
     /**
-     * @return array{user: User, posts: array, replies: array, likedPosts: array}|null
+     * @return array{user: User, posts: array, replies: array, likedPosts: array, followers: array, following: array}|null
      */
     public function execute(string $userId, ?string $authUserId = null): ?array
     {
@@ -33,6 +35,8 @@ class GetUserProfileUseCase
             'posts' => $this->postRepository->getByUserId($userId, $authUserId),
             'replies' => $this->replyRepository->getByUserId($userId),
             'likedPosts' => $this->likeRepository->getLikedPostsByUserId($userId, $authUserId),
+            'followers' => $this->followRepository->getFollowers($userId, $authUserId),
+            'following' => $this->followRepository->getFollowing($userId, $authUserId),
         ];
     }
 }
