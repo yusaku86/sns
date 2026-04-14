@@ -1,4 +1,4 @@
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
 import { show as showHashtag } from '@/routes/hashtags';
 import { store as likePost, destroy as unlikePost } from '@/routes/likes';
@@ -7,6 +7,7 @@ import {
     store as retweetPost,
     destroy as unretweetPost,
 } from '@/routes/retweets';
+import { show as showUser } from '@/routes/users';
 
 type Post = {
     id: string;
@@ -60,7 +61,10 @@ export default function PostCard({ post }: { post: Post }) {
     const initial = post.userName.charAt(0).toUpperCase();
 
     return (
-        <div className="border-b border-[#E5E7EB] p-4 transition-colors hover:bg-[#eae4dc]">
+        <div
+            className="cursor-pointer border-b border-[#E5E7EB] p-4 transition-colors hover:bg-[#eae4dc]"
+            onClick={() => router.visit(showPost.url(post.id))}
+        >
             {post.retweetedByUserName && (
                 <div className="mb-2 flex items-center gap-1.5 text-xs text-[#8a8784]">
                     <Repeat2 size={13} />
@@ -71,20 +75,26 @@ export default function PostCard({ post }: { post: Post }) {
             )}
             <div className="flex gap-3">
                 {/* アバター 48px */}
-                {post.userProfileImageUrl ? (
-                    <img
-                        src={post.userProfileImageUrl}
-                        alt={post.userName}
-                        className="h-12 w-12 shrink-0 rounded-full object-cover"
-                    />
-                ) : (
-                    <div
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
-                        aria-hidden="true"
-                    >
-                        {initial}
-                    </div>
-                )}
+                <Link
+                    href={showUser.url(post.userId)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="shrink-0"
+                >
+                    {post.userProfileImageUrl ? (
+                        <img
+                            src={post.userProfileImageUrl}
+                            alt={post.userName}
+                            className="h-12 w-12 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div
+                            className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
+                            aria-hidden="true"
+                        >
+                            {initial}
+                        </div>
+                    )}
+                </Link>
 
                 {/* コンテンツ */}
                 <div className="min-w-0 flex-1">
@@ -103,7 +113,10 @@ export default function PostCard({ post }: { post: Post }) {
                         </div>
                         {authUser?.id === post.userId && (
                             <button
-                                onClick={handleDelete}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete();
+                                }}
                                 disabled={processing}
                                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#8a8784] transition-colors hover:bg-[#eae4dc] hover:text-[#b36b09]"
                                 aria-label="削除"
@@ -136,6 +149,7 @@ export default function PostCard({ post }: { post: Post }) {
                         {/* リプライ */}
                         <Link
                             href={showPost.url(post.id)}
+                            onClick={(e) => e.stopPropagation()}
                             className="flex items-center gap-1.5 text-sm text-[#8a8784] transition-colors hover:text-[#3a6c72]"
                         >
                             <MessageCircle size={16} />
@@ -145,7 +159,10 @@ export default function PostCard({ post }: { post: Post }) {
                         {/* リツイート */}
                         {authUser ? (
                             <button
-                                onClick={handleRetweet}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRetweet();
+                                }}
                                 disabled={processing}
                                 className={`flex items-center gap-1.5 text-sm transition-colors disabled:opacity-50 ${
                                     post.retweetedByAuthUser
@@ -167,7 +184,10 @@ export default function PostCard({ post }: { post: Post }) {
                         {/* いいね */}
                         {authUser ? (
                             <button
-                                onClick={handleLike}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleLike();
+                                }}
                                 disabled={processing}
                                 className={`flex items-center gap-1.5 text-sm transition-colors disabled:opacity-50 ${
                                     post.likedByAuthUser
