@@ -1,5 +1,6 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { store as storeReply } from '@/routes/replies';
+import { show as showUser } from '@/routes/users';
 
 type Post = {
     id: string;
@@ -11,6 +12,7 @@ type Post = {
     likesCount: number;
     likedByAuthUser: boolean;
     repliesCount: number;
+    userProfileImageUrl?: string | null;
 };
 
 type Reply = {
@@ -39,7 +41,7 @@ function ReplyForm({ postId }: { postId: string }) {
 
     const { auth } = usePage().props as { auth: { user: AuthUser } };
     const authUser = auth?.user;
-    const initial = authUser?.name.charAt(0).toUpperCase() ?? '?';
+    const initial = authUser?.name?.charAt(0).toUpperCase() ?? '?';
 
     return (
         <form onSubmit={handleSubmit} className="border-b border-[#E5E7EB] p-4">
@@ -131,16 +133,29 @@ export default function PostShow({
     return (
         <>
             <Head title={`${post.userName}の投稿`} />
-            <div className="mx-auto max-w-2xl">
+            <div className="mx-auto w-full max-w-2xl">
                 {/* 元の投稿 */}
                 <div className="border-b border-[#E5E7EB] p-4">
                     <div className="flex gap-3">
-                        <div
-                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
-                            aria-hidden="true"
+                        <Link
+                            href={showUser.url(post.userId)}
+                            className="shrink-0"
                         >
-                            {initial}
-                        </div>
+                            {post.userProfileImageUrl ? (
+                                <img
+                                    src={post.userProfileImageUrl}
+                                    alt={post.userName}
+                                    className="h-12 w-12 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div
+                                    className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white"
+                                    aria-hidden="true"
+                                >
+                                    {initial}
+                                </div>
+                            )}
+                        </Link>
                         <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0">
                                 <span className="truncate text-sm font-semibold text-[#191816]">

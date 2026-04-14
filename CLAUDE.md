@@ -101,16 +101,53 @@ import { timeline } from '@/routes';
 
 新機能を追加する際は以下の順序で実装する。
 
+> **TDD必須**: 各ステップで実装コードより先にテストを書く（Red → Green → Refactor）。テストが Red になることを確認してから実装に進む。
+
 1. マイグレーション
-2. Domain Entity + **Unit Test**
+2. **Unit Test（Domain Entity）** → Domain Entity 実装
 3. Repository Interface（Domain層）
 4. Eloquent Model（Infrastructure層）
 5. Repository 実装（Infrastructure層）
-6. UseCase（Application層）+ **Unit Test**
+6. **Unit Test（UseCase）** → UseCase 実装（Application層）
 7. FormRequest（Presentation層）
-8. Controller（Presentation層）+ **Feature Test**
+8. **Feature Test（Controller）** → Controller 実装（Presentation層）
 9. ルーティング（`routes/web.php`）
 10. フロントエンド（ページ・コンポーネント）
+11. **脆弱性スキャン（security-reviewer サブエージェント）**
+    - 実装完了後、`security-reviewer` サブエージェントを起動してスキャンを実施する
+    - スキャン対象と確認項目は下記「脆弱性スキャン項目」を参照
+
+---
+
+## 脆弱性スキャン項目
+
+実装完了後、以下の項目を `security-reviewer` サブエージェントでスキャンする。
+
+### 認証・認可
+- **IDOR（Insecure Direct Object Reference）**: 他ユーザーのリソースに直接アクセスできないか（UUID使用でも Policy/Gate チェックが必要）
+- **認可漏れ**: Controller / UseCase に `authorize()` または Policy チェックが実装されているか
+- **認証バイパス**: 認証必須ルートに `auth` ミドルウェアが漏れなく適用されているか
+
+### 入力バリデーション・インジェクション
+- **SQLインジェクション**: `DB::raw()` や `whereRaw()` にユーザー入力が直接渡されていないか
+- **マスアサインメント**: Eloquent モデルに `$fillable` または `$guarded` が設定されているか
+- **バリデーション漏れ**: FormRequest で全入力フィールドにルールが定義されているか
+
+### XSS・出力エスケープ
+- **XSS**: Blade テンプレートで `{!! !!}` を使用している箇所（意図的な場合はコメントで明記）
+- **React での dangerouslySetInnerHTML**: 使用箇所がないか、または適切にサニタイズされているか
+
+### CSRF・リクエスト保護
+- **CSRF保護**: POST/PUT/PATCH/DELETE ルートが `VerifyCsrfToken` ミドルウェアの対象外になっていないか
+- **レート制限**: 認証エンドポイントや公開投稿 API に `throttle` が設定されているか
+
+### データ露出
+- **センシティブデータの露出**: API レスポンス（`toArray()` / Inertia props）にパスワードハッシュや内部IDが含まれていないか
+- **エラーメッセージ**: 本番環境でスタックトレースや詳細なエラーが露出しない設定になっているか
+
+### ファイル・依存関係
+- **ファイルアップロード**: ファイル種別・サイズのバリデーション、保存先がWebルートの外であること（該当機能がある場合）
+- **依存パッケージの既知脆弱性**: `composer audit` / `npm audit` で既知のCVEがないか
 
 ---
 
