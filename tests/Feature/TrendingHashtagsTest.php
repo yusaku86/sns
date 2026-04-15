@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Hashtag\Entities\Hashtag as HashtagEntity;
 use App\Infrastructure\Eloquent\Models\Hashtag;
 use App\Infrastructure\Eloquent\Models\Post;
 use App\Infrastructure\Eloquent\Models\User;
@@ -90,7 +91,7 @@ it('投稿削除（HTTP経由）でも Observer を通じてジョブがキュ�
 
 it('キャッシュがある場合は DB にアクセスせず shared props を返す', function () {
     Cache::put('trending_hashtags', [
-        ['name' => 'Cached', 'postsCount' => 999],
+        new HashtagEntity(id: 'uuid-cached', name: 'Cached', postsCount: 999),
     ], 300);
 
     $this->withoutVite()

@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { show } from '@/routes/hashtags';
 
 type TrendingHashtag = {
+    id: string;
     name: string;
     postsCount: number;
 };
