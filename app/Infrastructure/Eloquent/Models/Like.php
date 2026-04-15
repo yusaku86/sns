@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
  * @property-read Post $post
  * @property-read User $user
  *
+ * @method static \Database\Factories\LikeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Like newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Like newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Like query()
