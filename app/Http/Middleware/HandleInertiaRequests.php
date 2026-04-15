@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Application\Hashtag\GetTrendingHashtagsUseCase;
+use App\Infrastructure\Eloquent\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -15,6 +17,10 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    public function __construct(
+        private GetTrendingHashtagsUseCase $getTrendingHashtags,
+    ) {}
 
     /**
      * Determines the current asset version.
@@ -41,11 +47,31 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $user,
+                'user' => $user ? $this->serializeUser($user) : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
             'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
+            'trendingHashtags' => fn () => $this->getTrendingHashtags->execute(),
+        ];
+    }
+
+    /**
+     * フロントエンドに必要なフィールドのみを渡す。
+     * Eloquent モデルを直接渡すと不要なフィールドが露出するリスクがあるため
+     * 明示的に許可したフィールドのみシリアライズする。
+     *
+     * @return array<string, mixed>
+     */
+    private function serializeUser(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'email_verified_at' => $user->email_verified_at?->toISOString(),
+            'profile_image_url' => $user->profile_image_url,
+            'two_factor_enabled' => ! is_null($user->two_factor_confirmed_at),
         ];
     }
 }

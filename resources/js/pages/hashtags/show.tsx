@@ -86,7 +86,7 @@ export default function HashtagShow({
     return (
         <>
             <Head title={`#${hashtag}`} />
-            <div className="mx-auto flex max-w-5xl gap-8 px-4">
+            <div className="mx-auto flex w-full max-w-5xl gap-8 overflow-x-hidden px-4">
                 {/* メインコンテンツ */}
                 <div className="min-w-0 flex-1">
                     <h1 className="border-b border-[#E5E7EB] py-4 text-xl font-semibold text-[#191816]">

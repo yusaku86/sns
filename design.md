@@ -300,6 +300,197 @@ public function register(): void
 
 ---
 
+## トレンド機能の設計詳細
+
+### 概要
+
+全ハッシュタグのうち投稿数上位5件を右サイドバーに表示する。投稿が多い場合でも応答性を維持するため、ランキングはキャッシュ（TTL: 5分）から取得する。キャッシュは投稿作成・削除イベント発生時に非同期で更新する。
+
+### キャッシュ戦略
+
+| 項目 | 内容 |
+|------|------|
+| キャッシュキー | `trending_hashtags` |
+| TTL | 5分 |
+| ドライバー | Laravelデフォルト（`.env` の `CACHE_STORE`） |
+| 更新タイミング | 投稿作成・削除後にジョブをキューへディスパッチ |
+
+```
+PostCreated / PostDeleted イベント
+    → UpdateTrendingHashtagsJob（キューワーカー）
+        → Cache::put('trending_hashtags', [...], 300)
+```
+
+### Hashtag エンティティ変更
+
+`postsCount` フィールドを追加し、トレンド表示で投稿数を渡せるようにする。
+
+```php
+// app/Domain/Hashtag/Entities/Hashtag.php
+class Hashtag implements JsonSerializable
+{
+    public function __construct(
+        public readonly string $id,
+        public readonly string $name,
+        public readonly int $postsCount = 0,   // 追加
+    ) {}
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id'         => $this->id,
+            'name'       => $this->name,
+            'postsCount' => $this->postsCount,
+        ];
+    }
+}
+```
+
+### HashtagRepositoryInterface 変更
+
+```php
+// app/Domain/Hashtag/Repositories/HashtagRepositoryInterface.php
+interface HashtagRepositoryInterface
+{
+    public function findOrCreateByName(string $name): Hashtag;
+
+    /** @param string[] $names */
+    public function syncToPost(array $names, string $postId): void;
+
+    /**
+     * 投稿数の多いハッシュタグを上位 $limit 件返す
+     * @return Hashtag[]
+     */
+    public function getTrending(int $limit = 5): array;   // 追加
+}
+```
+
+### EloquentHashtagRepository 変更
+
+```php
+public function getTrending(int $limit = 5): array
+{
+    return HashtagModel::withCount('posts')
+        ->orderByDesc('posts_count')
+        ->limit($limit)
+        ->get()
+        ->map(fn ($m) => new HashtagEntity(
+            id: $m->id,
+            name: $m->name,
+            postsCount: $m->posts_count,
+        ))
+        ->all();
+}
+```
+
+### GetTrendingHashtagsUseCase（新規）
+
+```php
+// app/Application/Hashtag/GetTrendingHashtagsUseCase.php
+class GetTrendingHashtagsUseCase
+{
+    private const CACHE_KEY = 'trending_hashtags';
+    private const CACHE_TTL = 300; // 秒
+
+    public function __construct(
+        private HashtagRepositoryInterface $hashtagRepository,
+    ) {}
+
+    /** @return array<array{name: string, postsCount: int}> */
+    public function execute(): array
+    {
+        return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
+            return array_map(
+                fn ($h) => ['name' => $h->name, 'postsCount' => $h->postsCount],
+                $this->hashtagRepository->getTrending(5),
+            );
+        });
+    }
+}
+```
+
+### UpdateTrendingHashtagsJob（新規）
+
+```php
+// app/Jobs/UpdateTrendingHashtagsJob.php
+class UpdateTrendingHashtagsJob implements ShouldQueue
+{
+    public function handle(HashtagRepositoryInterface $hashtagRepository): void
+    {
+        $trending = array_map(
+            fn ($h) => ['name' => $h->name, 'postsCount' => $h->postsCount],
+            $hashtagRepository->getTrending(5),
+        );
+        Cache::put('trending_hashtags', $trending, 300);
+    }
+}
+```
+
+### Inertia shared props（SharedData）
+
+トレンドデータは全ページで使うため、`HandleInertiaRequests` ミドルウェアで shared props として渡す。
+
+```php
+// app/Http/Middleware/HandleInertiaRequests.php
+public function share(Request $request): array
+{
+    return [
+        ...parent::share($request),
+        'trendingHashtags' => fn () => $this->getTrendingHashtags->execute(),
+    ];
+}
+```
+
+### フロントエンド変更
+
+#### `resources/js/components/right-sidebar.tsx`
+
+- ハードコードの `trends` 配列を削除
+- `usePage().props.trendingHashtags` から取得
+- 各ハッシュタグをクリックで `/hashtags/:name` に遷移する `<Link>` に変更
+- 投稿数を `{trend.postsCount}件の投稿` として表示
+
+```tsx
+import { Link, usePage } from '@inertiajs/react';
+
+type TrendingHashtag = { name: string; postsCount: number };
+
+export default function RightSidebar() {
+    const { trendingHashtags } = usePage<{ trendingHashtags: TrendingHashtag[] }>().props;
+    // ...
+}
+```
+
+### ディレクトリ構成への追記
+
+```
+app/
+├── Application/Hashtag/
+│   ├── GetHashtagPostsUseCase.php
+│   └── GetTrendingHashtagsUseCase.php   ← 【新規】
+└── Jobs/
+    └── UpdateTrendingHashtagsJob.php    ← 【新規】
+```
+
+### 実装タスク一覧
+
+| # | 層 | ファイル | 内容 |
+|---|---|---------|------|
+| 1 | Domain | `app/Domain/Hashtag/Entities/Hashtag.php` | `postsCount` フィールド追加・`JsonSerializable` 実装 |
+| 2 | Domain | `app/Domain/Hashtag/Repositories/HashtagRepositoryInterface.php` | `getTrending(int $limit = 5): array` 追加 |
+| 3 | Infrastructure | `app/Infrastructure/Eloquent/Repositories/EloquentHashtagRepository.php` | `getTrending()` 実装 |
+| 4 | Application | `app/Application/Hashtag/GetTrendingHashtagsUseCase.php` | キャッシュ付きトレンド取得UC（新規）|
+| 5 | Job | `app/Jobs/UpdateTrendingHashtagsJob.php` | キャッシュ再構築ジョブ（新規）|
+| 6 | Provider | `app/Providers/AppServiceProvider.php` | `GetTrendingHashtagsUseCase` をミドルウェアにDI登録 |
+| 7 | Middleware | `app/Http/Middleware/HandleInertiaRequests.php` | `trendingHashtags` を shared props に追加 |
+| 8 | Application | `app/Application/Post/CreatePostUseCase.php` | 投稿作成後に `UpdateTrendingHashtagsJob` をディスパッチ |
+| 9 | Application | `app/Application/Post/DeletePostUseCase.php` | 投稿削除後に `UpdateTrendingHashtagsJob` をディスパッチ |
+| 10 | Frontend | `resources/js/components/right-sidebar.tsx` | ダミーデータを shared props に差し替え・リンク化 |
+| 11 | Test | `tests/Unit/Application/Hashtag/GetTrendingHashtagsUseCaseTest.php` | キャッシュヒット・ミス両ケース |
+| 12 | Test | `tests/Feature/Http/Controllers/` | shared props に `trendingHashtags` が含まれるか確認 |
+
+---
+
 ## 返信機能の設計詳細
 
 ### テーブル設計

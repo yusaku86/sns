@@ -28,4 +28,18 @@ class EloquentHashtagRepository implements HashtagRepositoryInterface
         $post = Post::findOrFail($postId);
         $post->hashtags()->sync($ids);
     }
+
+    public function getTrending(int $limit = 5): array
+    {
+        return HashtagModel::withCount('posts')
+            ->orderByDesc('posts_count')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($model) => new HashtagEntity(
+                id: $model->id,
+                name: $model->name,
+                postsCount: $model->posts_count,
+            ))
+            ->all();
+    }
 }
