@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "mcp__miro__context_get",
-      "Bash(./vendor/bin/sail artisan:*)"
+      "Bash(./vendor/bin/sail artisan:*)",
+      "mcp__plugin_github_github__issue_write"
     ]
   },
   "enabledPlugins": {

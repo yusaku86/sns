@@ -1,4 +1,12 @@
+import { Link, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
+import { show } from '@/routes/hashtags';
+
+type TrendingHashtag = {
+    id: string;
+    name: string;
+    postsCount: number;
+};
 
 const suggestedUsers = [
     { name: '田中 健太', handle: 'kenta_t' },
@@ -6,13 +14,11 @@ const suggestedUsers = [
     { name: '高橋 大輔', handle: 'daisuke_t' },
 ];
 
-const trends = [
-    { tag: '#デザイン思考', count: '1,247' },
-    { tag: '#春の読書', count: '892' },
-    { tag: '#朝活ルーティン', count: '634' },
-];
-
 export default function RightSidebar() {
+    const { trendingHashtags } = usePage<{
+        trendingHashtags: TrendingHashtag[];
+    }>().props;
+
     return (
         <div className="space-y-6 py-4">
             {/* 検索バー */}
@@ -61,16 +67,26 @@ export default function RightSidebar() {
                     トレンド
                 </h2>
                 <div className="space-y-4 rounded-md bg-[#eae4dc] p-4">
-                    {trends.map((trend) => (
-                        <div key={trend.tag}>
-                            <p className="text-sm font-semibold text-[#191816]">
-                                {trend.tag}
-                            </p>
-                            <p className="text-xs text-[#8a8784]">
-                                {trend.count}件の投稿
-                            </p>
-                        </div>
-                    ))}
+                    {trendingHashtags.length === 0 ? (
+                        <p className="text-sm text-[#8a8784]">
+                            トレンドはまだありません
+                        </p>
+                    ) : (
+                        trendingHashtags.map((trend) => (
+                            <Link
+                                key={trend.name}
+                                href={show.url(trend.name)}
+                                className="block hover:opacity-75"
+                            >
+                                <p className="text-sm font-semibold text-[#191816]">
+                                    #{trend.name}
+                                </p>
+                                <p className="text-xs text-[#8a8784]">
+                                    {trend.postsCount.toLocaleString()}件の投稿
+                                </p>
+                            </Link>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

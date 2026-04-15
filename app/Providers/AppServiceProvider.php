@@ -9,6 +9,8 @@ use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
 use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
+use App\Infrastructure\Eloquent\Models\Post as PostModel;
+use App\Infrastructure\Eloquent\Observers\PostObserver;
 use App\Infrastructure\Eloquent\Repositories\EloquentFollowRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentHashtagRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentLikeRepository;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        PostModel::observe(PostObserver::class);
         $this->configureDefaults();
         $this->configureFactories();
     }
