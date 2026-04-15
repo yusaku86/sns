@@ -1,12 +1,13 @@
 import { Head, usePage } from '@inertiajs/react';
 import { CalendarDays, Pencil } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import EditProfileModal from '@/components/edit-profile-modal';
 import FollowButton from '@/components/follow-button';
 import FollowUserListModal from '@/components/follow-user-list-modal';
 import type { FollowUser } from '@/components/follow-user-list-modal';
 import PostCard from '@/components/post-card';
 import RightSidebar from '@/components/right-sidebar';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 
 type UserProfile = {
     id: string;
@@ -138,6 +139,8 @@ function ReplyWithContext({ reply }: { reply: Reply }) {
 export default function UserShow({
     user,
     posts,
+    nextCursor,
+    hasMore,
     replies,
     likedPosts,
     followers,
@@ -145,25 +148,81 @@ export default function UserShow({
 }: {
     user: UserProfile;
     posts: Post[];
+    nextCursor: string | null;
+    hasMore: boolean;
     replies: Reply[];
     likedPosts: Post[];
     followers: FollowUser[] | undefined;
     following: FollowUser[] | undefined;
 }) {
-    const { auth } = usePage().props as { auth: { user: AuthUser } };
+    const page = usePage();
+    const { auth } = page.props as { auth: { user: AuthUser } };
     const authUser = auth?.user;
     const isOwnProfile = authUser?.id === user.id;
 
     const [activeTab, setActiveTab] = useState<Tab>('posts');
     const [openModal, setOpenModal] = useState<FollowModal>(null);
 
+    // インフィニットスクロール用の蓄積状態
+    const [allPosts, setAllPosts] = useState<Post[]>(posts);
+    const [hasMoreState, setHasMoreState] = useState(hasMore);
+    const cursorRef = useRef<string | null>(nextCursor);
+    const loadingRef = useRef(false);
+
+    const loadMore = useCallback(async () => {
+        if (!cursorRef.current || loadingRef.current) {
+            return;
+        }
+
+        loadingRef.current = true;
+
+        try {
+            const url = new URL(
+                window.location.pathname,
+                window.location.origin,
+            );
+            url.searchParams.set('cursor', cursorRef.current);
+
+            const response = await fetch(url.toString(), {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Inertia': 'true',
+                    'X-Inertia-Version': page.version ?? '',
+                    'X-Inertia-Partial-Component': page.component,
+                    'X-Inertia-Partial-Data': 'posts,nextCursor,hasMore',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+            const newPosts: Post[] = data.props.posts;
+            const newCursor: string | null = data.props.nextCursor;
+            const newHasMore: boolean = data.props.hasMore;
+
+            setAllPosts((prev) => [...prev, ...newPosts]);
+            cursorRef.current = newCursor;
+            setHasMoreState(newHasMore);
+        } finally {
+            loadingRef.current = false;
+        }
+    }, [page.version, page.component]);
+
+    const sentinelRef = useInfiniteScroll(
+        loadMore,
+        hasMoreState && activeTab === 'posts',
+    );
+
     const initial = user.name.charAt(0).toUpperCase();
     const joinDate = formatJoinDate(user.createdAt);
 
-    const tabs: { key: Tab; label: string; count: number }[] = [
-        { key: 'posts', label: '投稿', count: posts.length },
-        { key: 'replies', label: 'リプライ', count: replies.length },
-        { key: 'likes', label: 'いいね', count: likedPosts.length },
+    const tabs: { key: Tab; label: string }[] = [
+        { key: 'posts', label: '投稿' },
+        { key: 'replies', label: 'リプライ' },
+        { key: 'likes', label: 'いいね' },
     ];
 
     return (
@@ -309,15 +368,16 @@ export default function UserShow({
                     {/* タブコンテンツ */}
                     {activeTab === 'posts' && (
                         <div>
-                            {posts.length === 0 ? (
+                            {allPosts.length === 0 ? (
                                 <p className="p-8 text-center text-sm text-[#8a8784]">
                                     まだ投稿がありません。
                                 </p>
                             ) : (
-                                posts.map((post) => (
+                                allPosts.map((post) => (
                                     <PostCard key={post.id} post={post} />
                                 ))
                             )}
+                            <div ref={sentinelRef} />
                         </div>
                     )}
 

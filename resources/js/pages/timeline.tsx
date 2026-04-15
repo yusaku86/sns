@@ -1,7 +1,9 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
+import { useCallback, useRef, useState } from 'react';
 import PostCard from '@/components/post-card';
 import PostForm from '@/components/post-form';
 import RightSidebar from '@/components/right-sidebar';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 
 type Post = {
     id: string;
@@ -12,12 +14,73 @@ type Post = {
     createdAt: string;
     likesCount: number;
     likedByAuthUser: boolean;
+    repliesCount: number;
+    retweetsCount: number;
+    retweetedByAuthUser: boolean;
     retweetId?: string | null;
     retweetedByUserName?: string | null;
     retweetedByUserHandle?: string | null;
 };
 
-export default function Timeline({ posts }: { posts: Post[] }) {
+export default function Timeline({
+    posts,
+    nextCursor,
+    hasMore,
+}: {
+    posts: Post[];
+    nextCursor: string | null;
+    hasMore: boolean;
+}) {
+    const { version, component } = usePage();
+    const [allPosts, setAllPosts] = useState<Post[]>(posts);
+    const [hasMoreState, setHasMoreState] = useState(hasMore);
+    const cursorRef = useRef<string | null>(nextCursor);
+    const loadingRef = useRef(false);
+
+    const loadMore = useCallback(async () => {
+        if (!cursorRef.current || loadingRef.current) {
+            return;
+        }
+
+        loadingRef.current = true;
+
+        try {
+            const url = new URL(
+                window.location.pathname,
+                window.location.origin,
+            );
+            url.searchParams.set('cursor', cursorRef.current);
+
+            const response = await fetch(url.toString(), {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Inertia': 'true',
+                    'X-Inertia-Version': version ?? '',
+                    'X-Inertia-Partial-Component': component,
+                    'X-Inertia-Partial-Data': 'posts,nextCursor,hasMore',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+            const newPosts: Post[] = data.props.posts;
+            const newCursor: string | null = data.props.nextCursor;
+            const newHasMore: boolean = data.props.hasMore;
+
+            setAllPosts((prev) => [...prev, ...newPosts]);
+            cursorRef.current = newCursor;
+            setHasMoreState(newHasMore);
+        } finally {
+            loadingRef.current = false;
+        }
+    }, [version, component]);
+
+    const sentinelRef = useInfiniteScroll(loadMore, hasMoreState);
+
     return (
         <>
             <Head title="タイムライン" />
@@ -25,18 +88,19 @@ export default function Timeline({ posts }: { posts: Post[] }) {
                 {/* メインコンテンツ */}
                 <div className="min-w-0 flex-1">
                     <PostForm />
-                    {posts.length === 0 ? (
+                    {allPosts.length === 0 ? (
                         <p className="p-8 text-center text-sm text-muted-foreground">
                             フォローしているユーザーの投稿がありません。
                         </p>
                     ) : (
-                        posts.map((post) => (
+                        allPosts.map((post) => (
                             <PostCard
                                 key={post.retweetId ?? post.id}
                                 post={post}
                             />
                         ))
                     )}
+                    <div ref={sentinelRef} />
                 </div>
 
                 {/* 右サイドバー */}

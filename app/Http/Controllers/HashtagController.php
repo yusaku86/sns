@@ -15,14 +15,21 @@ class HashtagController extends Controller
 
     public function show(Request $request, string $hashtag): Response
     {
-        $posts = $this->getHashtagPosts->execute(
+        $validated = $request->validate([
+            'cursor' => ['nullable', 'string', 'date_format:Y-m-d\TH:i:sP'],
+        ]);
+
+        $result = $this->getHashtagPosts->execute(
             hashtagName: $hashtag,
             authUserId: $request->user()?->id,
+            cursor: $validated['cursor'] ?? null,
         );
 
         return Inertia::render('hashtags/show', [
             'hashtag' => $hashtag,
-            'posts' => $posts,
+            'posts' => $result['posts'],
+            'nextCursor' => $result['nextCursor'],
+            'hasMore' => $result['hasMore'],
         ]);
     }
 }
