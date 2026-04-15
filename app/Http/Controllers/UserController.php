@@ -20,9 +20,14 @@ class UserController extends Controller
 
     public function show(Request $request, User $user): Response
     {
+        $validated = $request->validate([
+            'cursor' => ['nullable', 'string', 'date_format:Y-m-d\TH:i:sP'],
+        ]);
+
         $result = $this->getUserProfile->execute(
             userId: $user->id,
             authUserId: $request->user()?->id,
+            cursor: $validated['cursor'] ?? null,
         );
 
         abort_if(! $result, 404);
@@ -30,6 +35,8 @@ class UserController extends Controller
         return Inertia::render('users/show', [
             'user' => $result['user'],
             'posts' => $result['posts'],
+            'nextCursor' => $result['nextCursor'],
+            'hasMore' => $result['hasMore'],
             'replies' => $result['replies'],
             'likedPosts' => $result['likedPosts'],
             'followers' => Inertia::defer(fn () => $result['followers']),

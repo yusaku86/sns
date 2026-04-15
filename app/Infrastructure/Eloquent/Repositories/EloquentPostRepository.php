@@ -8,7 +8,7 @@ use App\Infrastructure\Eloquent\Models\Follow;
 use App\Infrastructure\Eloquent\Models\Hashtag as HashtagModel;
 use App\Infrastructure\Eloquent\Models\Post as PostModel;
 use App\Infrastructure\Eloquent\Models\Retweet as RetweetModel;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class EloquentPostRepository implements PostRepositoryInterface
@@ -24,27 +24,38 @@ class EloquentPostRepository implements PostRepositoryInterface
         return $this->toEntity($model, $authUserId);
     }
 
-    public function getTimeline(string $userId, int $limit = 20): array
+    public function getTimeline(string $userId, int $limit = 20, ?string $cursor = null): array
     {
         $followingIds = Follow::where('follower_id', $userId)
             ->pluck('following_id');
 
-        $posts = PostModel::with(['user', 'hashtags'])
+        $postQuery = PostModel::with(['user', 'hashtags'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->whereIn('user_id', $followingIds)
-            ->latest()
-            ->limit($limit)
-            ->get()
-            ->map(fn ($model) => $this->toEntity($model, $userId));
+            ->latest();
 
-        $retweets = RetweetModel::with([
+        $retweetQuery = RetweetModel::with([
             'user',
             'post' => fn ($q) => $q->with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets']),
         ])
             ->whereIn('user_id', $followingIds)
-            ->latest()
-            ->limit($limit)
-            ->get()
+            ->latest();
+
+        if ($cursor !== null) {
+            try {
+                $cursorTime = new \DateTimeImmutable($cursor);
+                $formatted = $cursorTime->format('Y-m-d H:i:s');
+                $postQuery->where('created_at', '<', $formatted);
+                $retweetQuery->where('created_at', '<', $formatted);
+            } catch (\Exception) {
+                // 無効なカーソルは無視してカーソルなしと同等に扱う
+            }
+        }
+
+        $posts = $postQuery->limit($limit)->get()
+            ->map(fn ($model) => $this->toEntity($model, $userId));
+
+        $retweets = $retweetQuery->limit($limit)->get()
             ->map(fn ($rt) => $this->toEntityFromRetweet($rt, $userId));
 
         return collect($posts)->merge($retweets)
@@ -54,22 +65,33 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->all();
     }
 
-    public function getAll(?string $authUserId = null, int $limit = 20): array
+    public function getAll(?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
-        $posts = PostModel::with(['user', 'hashtags'])
+        $postQuery = PostModel::with(['user', 'hashtags'])
             ->withCount(['likes', 'replies', 'retweets'])
-            ->latest()
-            ->limit($limit)
-            ->get()
-            ->map(fn ($model) => $this->toEntity($model, $authUserId));
+            ->latest();
 
-        $retweets = RetweetModel::with([
+        $retweetQuery = RetweetModel::with([
             'user',
             'post' => fn ($q) => $q->with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets']),
         ])
-            ->latest()
-            ->limit($limit)
-            ->get()
+            ->latest();
+
+        if ($cursor !== null) {
+            try {
+                $cursorTime = new \DateTimeImmutable($cursor);
+                $formatted = $cursorTime->format('Y-m-d H:i:s');
+                $postQuery->where('created_at', '<', $formatted);
+                $retweetQuery->where('created_at', '<', $formatted);
+            } catch (\Exception) {
+                // 無効なカーソルは無視してカーソルなしと同等に扱う
+            }
+        }
+
+        $posts = $postQuery->limit($limit)->get()
+            ->map(fn ($model) => $this->toEntity($model, $authUserId));
+
+        $retweets = $retweetQuery->limit($limit)->get()
             ->map(fn ($rt) => $this->toEntityFromRetweet($rt, $authUserId));
 
         return collect($posts)->merge($retweets)
@@ -93,22 +115,28 @@ class EloquentPostRepository implements PostRepositoryInterface
         PostModel::destroy($id);
     }
 
-    public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20): array
+    public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
-        /** @var Collection<int, PostModel> $posts */
-        $posts = PostModel::with(['user', 'hashtags'])
+        $query = PostModel::with(['user', 'hashtags'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->where('user_id', $userId)
-            ->latest()
-            ->limit($limit)
-            ->get();
+            ->latest();
 
-        return $posts
+        if ($cursor !== null) {
+            try {
+                $cursorTime = new \DateTimeImmutable($cursor);
+                $query->where('created_at', '<', $cursorTime->format('Y-m-d H:i:s'));
+            } catch (\Exception) {
+                // 無効なカーソルは無視してカーソルなしと同等に扱う
+            }
+        }
+
+        return $query->limit($limit)->get()
             ->map(fn (PostModel $model) => $this->toEntity($model, $authUserId))
             ->all();
     }
 
-    public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20): array
+    public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
         $hashtag = HashtagModel::where('name', $hashtagName)->first();
 
@@ -116,15 +144,24 @@ class EloquentPostRepository implements PostRepositoryInterface
             return [];
         }
 
-        /** @var Collection<int, PostModel> $posts */
-        $posts = $hashtag->posts()
+        $query = $hashtag->posts()
             ->with(['user', 'hashtags'])
             ->withCount(['likes', 'replies', 'retweets'])
-            ->latest()
-            ->limit($limit)
-            ->get();
+            ->latest();
 
-        return $posts
+        if ($cursor !== null) {
+            try {
+                $cursorTime = new \DateTimeImmutable($cursor);
+                $query->where('posts.created_at', '<', $cursorTime->format('Y-m-d H:i:s'));
+            } catch (\Exception) {
+                // 無効なカーソルは無視してカーソルなしと同等に扱う
+            }
+        }
+
+        /** @var Collection<int, PostModel> $results */
+        $results = $query->limit($limit)->get();
+
+        return $results
             ->map(fn (PostModel $model) => $this->toEntity($model, $authUserId))
             ->all();
     }

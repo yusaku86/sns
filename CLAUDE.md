@@ -13,6 +13,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Wayfinder（TypeScriptルート定義）再生成
 ./vendor/bin/sail artisan wayfinder:generate
+
+# Eloquentモデルの型定義（PHPDoc）を再生成
+# LaraStan でモデル関連の型推論エラーが出たときに実行する
+./vendor/bin/sail artisan ide-helper:models -RW
 ```
 
 ---

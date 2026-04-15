@@ -23,11 +23,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $name
  * @property string $handle
  * @property string|null $bio
+ * @property string|null $header_image
+ * @property string|null $profile_image
  * @property string $email
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
- * @property string|null $profile_image
- * @property string|null $profile_image_url
  * @property string|null $current_team_id
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
@@ -48,6 +48,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read int|null $owned_teams_count
  * @property-read Collection<int, Post> $posts
  * @property-read int|null $posts_count
+ * @property-read mixed $profile_image_url
  * @property-read Collection<int, Membership> $teamMemberships
  * @property-read int|null $team_memberships_count
  * @property-read Collection<int, Team> $teams
@@ -63,9 +64,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereHandle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereHeaderImage($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereProfileImage($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorConfirmedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorRecoveryCodes($value)

@@ -15,10 +15,16 @@ class ExploreController extends Controller
 
     public function index(Request $request): Response
     {
-        $posts = $this->getExplore->execute($request->user()?->id);
+        $validated = $request->validate([
+            'cursor' => ['nullable', 'string', 'date_format:Y-m-d\TH:i:sP'],
+        ]);
+
+        $result = $this->getExplore->execute($request->user()?->id, $validated['cursor'] ?? null);
 
         return Inertia::render('explore', [
-            'posts' => $posts,
+            'posts' => $result['posts'],
+            'nextCursor' => $result['nextCursor'],
+            'hasMore' => $result['hasMore'],
         ]);
     }
 }

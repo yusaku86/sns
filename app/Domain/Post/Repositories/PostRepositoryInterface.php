@@ -9,18 +9,18 @@ interface PostRepositoryInterface
     public function findById(string $id, ?string $authUserId = null): ?Post;
 
     /** @return Post[] */
-    public function getTimeline(string $userId, int $limit = 20): array;
+    public function getTimeline(string $userId, int $limit = 20, ?string $cursor = null): array;
 
     /** @return Post[] */
-    public function getAll(?string $authUserId = null, int $limit = 20): array;
+    public function getAll(?string $authUserId = null, int $limit = 20, ?string $cursor = null): array;
 
     public function save(Post $post): void;
 
     public function delete(string $id): void;
 
     /** @return Post[] */
-    public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20): array;
+    public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array;
 
     /** @return Post[] */
-    public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20): array;
+    public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array;
 }

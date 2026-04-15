@@ -15,10 +15,16 @@ class TimelineController extends Controller
 
     public function index(Request $request): Response
     {
-        $posts = $this->getTimeline->execute($request->user()->id);
+        $validated = $request->validate([
+            'cursor' => ['nullable', 'string', 'date_format:Y-m-d\TH:i:sP'],
+        ]);
+
+        $result = $this->getTimeline->execute($request->user()->id, $validated['cursor'] ?? null);
 
         return Inertia::render('timeline', [
-            'posts' => $posts,
+            'posts' => $result['posts'],
+            'nextCursor' => $result['nextCursor'],
+            'hasMore' => $result['hasMore'],
         ]);
     }
 }
