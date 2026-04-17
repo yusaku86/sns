@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Hashtag\Repositories\HashtagRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
+use App\Domain\Post\Repositories\PostImageRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
 use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
@@ -14,6 +15,7 @@ use App\Infrastructure\Eloquent\Observers\PostObserver;
 use App\Infrastructure\Eloquent\Repositories\EloquentFollowRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentHashtagRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentLikeRepository;
+use App\Infrastructure\Eloquent\Repositories\EloquentPostImageRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentPostRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentReplyRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentRetweetRepository;
@@ -34,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PostRepositoryInterface::class, EloquentPostRepository::class);
+        $this->app->bind(PostImageRepositoryInterface::class, EloquentPostImageRepository::class);
         $this->app->bind(LikeRepositoryInterface::class, EloquentLikeRepository::class);
         $this->app->bind(FollowRepositoryInterface::class, EloquentFollowRepository::class);
         $this->app->bind(ReplyRepositoryInterface::class, EloquentReplyRepository::class);

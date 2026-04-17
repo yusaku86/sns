@@ -19,6 +19,8 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property-read Collection<int, Hashtag> $hashtags
+ * @property-read Collection<int, PostImage> $images
+ * @property-read int|null $images_count
  * @property-read int|null $hashtags_count
  * @property-read Collection<int, Like> $likes
  * @property-read int|null $likes_count
@@ -78,5 +80,10 @@ class Post extends Model
     public function hashtags(): BelongsToMany
     {
         return $this->belongsToMany(Hashtag::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(PostImage::class)->orderBy('order');
     }
 }

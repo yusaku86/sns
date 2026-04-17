@@ -3,10 +3,12 @@
 namespace App\Infrastructure\Eloquent\Repositories;
 
 use App\Domain\Post\Entities\Post as PostEntity;
+use App\Domain\Post\Entities\PostImage as PostImageEntity;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\Follow;
 use App\Infrastructure\Eloquent\Models\Hashtag as HashtagModel;
 use App\Infrastructure\Eloquent\Models\Post as PostModel;
+use App\Infrastructure\Eloquent\Models\PostImage as PostImageModel;
 use App\Infrastructure\Eloquent\Models\Retweet as RetweetModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +17,7 @@ class EloquentPostRepository implements PostRepositoryInterface
 {
     public function findById(string $id, ?string $authUserId = null): ?PostEntity
     {
-        $model = PostModel::with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets'])->find($id);
+        $model = PostModel::with(['user', 'hashtags', 'images'])->withCount(['likes', 'replies', 'retweets'])->find($id);
 
         if (! $model) {
             return null;
@@ -29,14 +31,14 @@ class EloquentPostRepository implements PostRepositoryInterface
         $followingIds = Follow::where('follower_id', $userId)
             ->pluck('following_id');
 
-        $postQuery = PostModel::with(['user', 'hashtags'])
+        $postQuery = PostModel::with(['user', 'hashtags', 'images'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->whereIn('user_id', $followingIds)
             ->latest();
 
         $retweetQuery = RetweetModel::with([
             'user',
-            'post' => fn ($q) => $q->with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets']),
+            'post' => fn ($q) => $q->with(['user', 'hashtags', 'images'])->withCount(['likes', 'replies', 'retweets']),
         ])
             ->whereIn('user_id', $followingIds)
             ->latest();
@@ -67,13 +69,13 @@ class EloquentPostRepository implements PostRepositoryInterface
 
     public function getAll(?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
-        $postQuery = PostModel::with(['user', 'hashtags'])
+        $postQuery = PostModel::with(['user', 'hashtags', 'images'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->latest();
 
         $retweetQuery = RetweetModel::with([
             'user',
-            'post' => fn ($q) => $q->with(['user', 'hashtags'])->withCount(['likes', 'replies', 'retweets']),
+            'post' => fn ($q) => $q->with(['user', 'hashtags', 'images'])->withCount(['likes', 'replies', 'retweets']),
         ])
             ->latest();
 
@@ -117,7 +119,7 @@ class EloquentPostRepository implements PostRepositoryInterface
 
     public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
-        $query = PostModel::with(['user', 'hashtags'])
+        $query = PostModel::with(['user', 'hashtags', 'images'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->where('user_id', $userId)
             ->latest();
@@ -145,7 +147,7 @@ class EloquentPostRepository implements PostRepositoryInterface
         }
 
         $query = $hashtag->posts()
-            ->with(['user', 'hashtags'])
+            ->with(['user', 'hashtags', 'images'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->latest();
 
@@ -198,6 +200,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             userProfileImageUrl: $model->user->profile_image
                 ? Storage::disk('public')->url($model->user->profile_image)
                 : null,
+            images: $this->toImageEntities($model),
         );
     }
 
@@ -227,6 +230,20 @@ class EloquentPostRepository implements PostRepositoryInterface
             userProfileImageUrl: $model->user->profile_image
                 ? Storage::disk('public')->url($model->user->profile_image)
                 : null,
+            images: $this->toImageEntities($model),
         );
+    }
+
+    /** @return PostImageEntity[] */
+    private function toImageEntities(PostModel $model): array
+    {
+        return $model->images
+            ->map(fn (PostImageModel $img) => new PostImageEntity(
+                id: $img->id,
+                postId: $img->post_id,
+                url: Storage::disk('local')->temporaryUrl($img->path, now()->addHour()),
+                order: $img->order,
+            ))
+            ->all();
     }
 }

@@ -9,6 +9,8 @@ use App\Http\Requests\StorePostRequest;
 use App\Infrastructure\Eloquent\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -35,11 +37,22 @@ class PostController extends Controller
 
     public function store(StorePostRequest $request): RedirectResponse
     {
+        $imagePaths = collect($request->file('images', []))
+            ->map(fn (UploadedFile $file) => $file->storeAs(
+                'post_images',
+                Str::uuid().'.'.$file->extension(),
+                'local',
+            ))
+            ->filter()
+            ->values()
+            ->all();
+
         $this->createPost->execute(
             userId: $request->user()->id,
             userName: $request->user()->name,
             userHandle: $request->user()->handle,
-            content: $request->validated('content'),
+            content: $request->validated('content') ?? '',
+            imagePaths: $imagePaths,
         );
 
         return back();

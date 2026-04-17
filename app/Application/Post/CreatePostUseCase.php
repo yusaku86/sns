@@ -4,6 +4,7 @@ namespace App\Application\Post;
 
 use App\Domain\Hashtag\Repositories\HashtagRepositoryInterface;
 use App\Domain\Post\Entities\Post;
+use App\Domain\Post\Repositories\PostImageRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use DateTimeImmutable;
 use Illuminate\Support\Str;
@@ -13,9 +14,13 @@ class CreatePostUseCase
     public function __construct(
         private PostRepositoryInterface $postRepository,
         private HashtagRepositoryInterface $hashtagRepository,
+        private PostImageRepositoryInterface $postImageRepository,
     ) {}
 
-    public function execute(string $userId, string $userName, string $userHandle, string $content): Post
+    /**
+     * @param  string[]  $imagePaths  ストレージ上のパス（order順、最大8件）
+     */
+    public function execute(string $userId, string $userName, string $userHandle, string $content, array $imagePaths = []): Post
     {
         $post = new Post(
             id: (string) Str::uuid(),
@@ -29,6 +34,10 @@ class CreatePostUseCase
         );
 
         $this->postRepository->save($post);
+
+        if ($imagePaths !== []) {
+            $this->postImageRepository->saveForPost($post->id, $imagePaths);
+        }
 
         $hashtags = $this->extractHashtags($content);
         if ($hashtags !== []) {

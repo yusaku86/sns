@@ -26,6 +26,8 @@ class Post implements JsonSerializable
         /** @var string[] */
         public readonly array $hashtags = [],
         public readonly ?string $userProfileImageUrl = null,
+        /** @var PostImage[] */
+        public readonly array $images = [],
     ) {}
 
     public function jsonSerialize(): array
@@ -47,6 +49,11 @@ class Post implements JsonSerializable
             'retweetedByUserHandle' => $this->retweetedByUserHandle,
             'hashtags' => $this->hashtags,
             'userProfileImageUrl' => $this->userProfileImageUrl,
+            'images' => array_map(fn (PostImage $img) => [
+                'id' => $img->id,
+                'url' => $img->url,
+                'order' => $img->order,
+            ], $this->images),
         ];
     }
 }
