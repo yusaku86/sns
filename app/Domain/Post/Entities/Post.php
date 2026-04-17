@@ -51,7 +51,7 @@ class Post implements JsonSerializable
             'userProfileImageUrl' => $this->userProfileImageUrl,
             'images' => array_map(fn (PostImage $img) => [
                 'id' => $img->id,
-                'url' => $img->url,
+                'path' => $img->path,
                 'order' => $img->order,
             ], $this->images),
         ];

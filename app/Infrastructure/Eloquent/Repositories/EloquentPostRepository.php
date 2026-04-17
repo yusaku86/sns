@@ -241,7 +241,7 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->map(fn (PostImageModel $img) => new PostImageEntity(
                 id: $img->id,
                 postId: $img->post_id,
-                url: Storage::disk('local')->temporaryUrl($img->path, now()->addHour()),
+                path: $img->path,
                 order: $img->order,
             ))
             ->all();

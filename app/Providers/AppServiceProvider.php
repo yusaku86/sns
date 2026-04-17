@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Application\Post\PostImageStorageInterface;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Hashtag\Repositories\HashtagRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
@@ -20,6 +21,7 @@ use App\Infrastructure\Eloquent\Repositories\EloquentPostRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentReplyRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentRetweetRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentUserRepository;
+use App\Infrastructure\Storage\PostImageStorage;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PostRepositoryInterface::class, EloquentPostRepository::class);
         $this->app->bind(PostImageRepositoryInterface::class, EloquentPostImageRepository::class);
+        $this->app->bind(PostImageStorageInterface::class, PostImageStorage::class);
         $this->app->bind(LikeRepositoryInterface::class, EloquentLikeRepository::class);
         $this->app->bind(FollowRepositoryInterface::class, EloquentFollowRepository::class);
         $this->app->bind(ReplyRepositoryInterface::class, EloquentReplyRepository::class);

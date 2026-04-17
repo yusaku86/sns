@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Application\User\GetUserProfileUseCase;
 use App\Application\User\UpdateUserProfileUseCase;
+use App\Http\Presenters\PostPresenter;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Infrastructure\Eloquent\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -34,11 +35,11 @@ class UserController extends Controller
 
         return Inertia::render('users/show', [
             'user' => $result['user'],
-            'posts' => $result['posts'],
+            'posts' => PostPresenter::collection($result['posts']),
             'nextCursor' => $result['nextCursor'],
             'hasMore' => $result['hasMore'],
             'replies' => $result['replies'],
-            'likedPosts' => $result['likedPosts'],
+            'likedPosts' => PostPresenter::collection($result['likedPosts']),
             'followers' => Inertia::defer(fn () => $result['followers']),
             'following' => Inertia::defer(fn () => $result['following']),
         ]);

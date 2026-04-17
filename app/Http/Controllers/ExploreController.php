@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Application\Explore\GetExploreUseCase;
+use App\Http\Presenters\PostPresenter;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -22,7 +23,7 @@ class ExploreController extends Controller
         $result = $this->getExplore->execute($request->user()?->id, $validated['cursor'] ?? null);
 
         return Inertia::render('explore', [
-            'posts' => $result['posts'],
+            'posts' => PostPresenter::collection($result['posts']),
             'nextCursor' => $result['nextCursor'],
             'hasMore' => $result['hasMore'],
         ]);

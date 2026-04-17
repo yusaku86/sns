@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Application\Post\CreatePostUseCase;
 use App\Application\Post\DeletePostUseCase;
 use App\Application\Post\GetPostUseCase;
+use App\Application\Post\PostImageStorageInterface;
+use App\Http\Presenters\PostPresenter;
 use App\Http\Requests\StorePostRequest;
-use App\Infrastructure\Eloquent\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,34 +20,28 @@ class PostController extends Controller
         private CreatePostUseCase $createPost,
         private DeletePostUseCase $deletePost,
         private GetPostUseCase $getPost,
+        private PostImageStorageInterface $imageStorage,
     ) {}
 
-    public function show(Request $request, Post $post): Response
+    public function show(Request $request, string $post): Response
     {
         ['post' => $postEntity, 'replies' => $replies] = $this->getPost->execute(
-            postId: $post->id,
+            postId: $post,
             authUserId: $request->user()?->id,
         );
 
         return Inertia::render('posts/show', [
-            'post' => $postEntity,
+            'post' => PostPresenter::toArray($postEntity),
             'replies' => $replies,
         ]);
     }
 
     public function store(StorePostRequest $request): RedirectResponse
     {
-        $imagePaths = collect($request->file('images', []))
-            ->map(fn (UploadedFile $file) => $file->storeAs(
-                'post_images',
-                Str::uuid().'.'.$file->extension(),
-                'local',
-            ))
-            ->filter()
-            ->values()
-            ->all();
+        $imagePaths = $this->imageStorage->storeAll($request->file('images', []));
 
         $this->createPost->execute(
+            postId: (string) Str::uuid(),
             userId: $request->user()->id,
             userName: $request->user()->name,
             userHandle: $request->user()->handle,
@@ -58,10 +52,10 @@ class PostController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, Post $post): RedirectResponse
+    public function destroy(Request $request, string $post): RedirectResponse
     {
         $this->deletePost->execute(
-            postId: $post->id,
+            postId: $post,
             authUserId: $request->user()->id,
         );
 

@@ -7,7 +7,6 @@ use App\Domain\Post\Entities\Post;
 use App\Domain\Post\Repositories\PostImageRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use DateTimeImmutable;
-use Illuminate\Support\Str;
 
 class CreatePostUseCase
 {
@@ -20,10 +19,10 @@ class CreatePostUseCase
     /**
      * @param  string[]  $imagePaths  ストレージ上のパス（order順、最大8件）
      */
-    public function execute(string $userId, string $userName, string $userHandle, string $content, array $imagePaths = []): Post
+    public function execute(string $postId, string $userId, string $userName, string $userHandle, string $content, array $imagePaths = []): Post
     {
         $post = new Post(
-            id: (string) Str::uuid(),
+            id: $postId,
             userId: $userId,
             userName: $userName,
             userHandle: $userHandle,
