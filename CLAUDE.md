@@ -120,6 +120,9 @@ import { timeline } from '@/routes';
 11. **脆弱性スキャン（security-reviewer サブエージェント）**
     - 実装完了後、`security-reviewer` サブエージェントを起動してスキャンを実施する
     - スキャン対象と確認項目は下記「脆弱性スキャン項目」を参照
+12. **アーキテクチャレビュー（laravel-architecture-reviewer サブエージェント）**
+    - 実装完了後、`laravel-architecture-reviewer` サブエージェントを起動してレビューを実施する
+    - Clean Architecture の層境界違反・Laravel ベストプラクティス違反・アーキテクチャ境界の逸脱がないか確認する
 
 ---
 
