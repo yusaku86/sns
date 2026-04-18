@@ -7,12 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * クッキーからアピアランス設定を読み取りビューに共有するミドルウェア。
+ */
 class HandleAppearance
 {
     /**
-     * Handle an incoming request.
+     * リクエストを処理してアピアランス設定をビューに共有する。
      *
-     * @param  Closure(Request): (Response)  $next
+     * @param  Request  $request  HTTPリクエスト
+     * @param  Closure(Request): Response  $next  次のミドルウェア
      */
     public function handle(Request $request, Closure $next): Response
     {

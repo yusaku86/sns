@@ -15,10 +15,16 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
+/**
+ * チーム招待の作成・取り消し・承認を担うコントローラー。
+ */
 class TeamInvitationController extends Controller
 {
     /**
-     * Store a newly created invitation.
+     * 招待を作成してメール通知を送る。
+     *
+     * @param  CreateTeamInvitationRequest  $request  バリデーション済みリクエスト
+     * @param  Team  $team  招待先チーム
      */
     public function store(CreateTeamInvitationRequest $request, Team $team): RedirectResponse
     {
@@ -40,7 +46,10 @@ class TeamInvitationController extends Controller
     }
 
     /**
-     * Cancel the specified invitation.
+     * 招待を取り消す。
+     *
+     * @param  Team  $team  対象チーム
+     * @param  TeamInvitation  $invitation  取り消し対象の招待
      */
     public function destroy(Team $team, TeamInvitation $invitation): RedirectResponse
     {
@@ -56,7 +65,10 @@ class TeamInvitationController extends Controller
     }
 
     /**
-     * Accept the invitation.
+     * 招待を承認してチームに参加する。
+     *
+     * @param  AcceptTeamInvitationRequest  $request  バリデーション済みリクエスト
+     * @param  TeamInvitation  $invitation  承認対象の招待
      */
     public function accept(AcceptTeamInvitationRequest $request, TeamInvitation $invitation): RedirectResponse
     {
@@ -65,12 +77,10 @@ class TeamInvitationController extends Controller
         DB::transaction(function () use ($user, $invitation) {
             $team = $invitation->team;
 
-            $membership = $team->memberships()->firstOrCreate(
+            $team->memberships()->firstOrCreate(
                 ['user_id' => $user->id],
                 ['role' => $invitation->role],
             );
-
-            $wasRecentlyCreated = $membership->wasRecentlyCreated;
 
             $invitation->update(['accepted_at' => now()]);
 

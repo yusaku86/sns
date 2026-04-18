@@ -9,12 +9,17 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * チームメンバーシップと最低ロールを検証するミドルウェア。
+ */
 class EnsureTeamMembership
 {
     /**
-     * Handle an incoming request.
+     * リクエストを処理する。チームメンバーでない場合は403を返す。
      *
-     * @param  Closure(Request): (Response)  $next
+     * @param  Request  $request  HTTPリクエスト
+     * @param  Closure(Request): Response  $next  次のミドルウェア
+     * @param  string|null  $minimumRole  必要な最低ロール（nullの場合はロールチェックなし）
      */
     public function handle(Request $request, Closure $next, ?string $minimumRole = null): Response
     {
@@ -32,7 +37,11 @@ class EnsureTeamMembership
     }
 
     /**
-     * Ensure the given user has at least the given role, if applicable.
+     * ユーザーが必要な最低ロールを満たしているか検証する。
+     *
+     * @param  User  $user  検証対象ユーザー
+     * @param  Team  $team  対象チーム
+     * @param  string|null  $minimumRole  必要な最低ロール文字列
      */
     protected function ensureTeamMemberHasRequiredRole(User $user, Team $team, ?string $minimumRole): void
     {
@@ -53,7 +62,9 @@ class EnsureTeamMembership
     }
 
     /**
-     * Get the team associated with the request.
+     * リクエストに紐づくチームを取得する。
+     *
+     * @param  Request  $request  HTTPリクエスト
      */
     protected function team(Request $request): ?Team
     {

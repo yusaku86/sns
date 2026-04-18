@@ -5,6 +5,9 @@ namespace App\Domain\Post\Entities;
 use DateTimeImmutable;
 use JsonSerializable;
 
+/**
+ * 投稿ドメインエンティティ。リツイート・いいね・リプライの集計情報を含む。
+ */
 class Post implements JsonSerializable
 {
     public function __construct(
@@ -26,8 +29,15 @@ class Post implements JsonSerializable
         /** @var string[] */
         public readonly array $hashtags = [],
         public readonly ?string $userProfileImageUrl = null,
+        /** @var PostImage[] */
+        public readonly array $images = [],
     ) {}
 
+    /**
+     * JSONシリアライズ用配列を返す。
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [
@@ -47,6 +57,11 @@ class Post implements JsonSerializable
             'retweetedByUserHandle' => $this->retweetedByUserHandle,
             'hashtags' => $this->hashtags,
             'userProfileImageUrl' => $this->userProfileImageUrl,
+            'images' => array_map(fn (PostImage $img) => [
+                'id' => $img->id,
+                'path' => $img->path,
+                'order' => $img->order,
+            ], $this->images),
         ];
     }
 }

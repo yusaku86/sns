@@ -7,10 +7,18 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * チームを新規作成してオーナーとして登録するアクション。
+ */
 class CreateTeam
 {
     /**
-     * Create a new team and add the user as owner.
+     * チームを作成してユーザーをオーナーとして追加する。
+     *
+     * @param  User  $user  オーナーになるユーザー
+     * @param  string  $name  チーム名
+     * @param  bool  $isPersonal  パーソナルチームか否か
+     * @return Team 作成されたチーム
      */
     public function handle(User $user, string $name, bool $isPersonal = false): Team
     {
@@ -20,7 +28,7 @@ class CreateTeam
                 'is_personal' => $isPersonal,
             ]);
 
-            $membership = $team->memberships()->create([
+            $team->memberships()->create([
                 'user_id' => $user->id,
                 'role' => TeamRole::Owner,
             ]);

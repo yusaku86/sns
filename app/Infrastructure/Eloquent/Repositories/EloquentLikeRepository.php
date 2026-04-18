@@ -9,8 +9,14 @@ use App\Infrastructure\Eloquent\Models\Post as PostModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Eloquentを使ったいいねリポジトリの実装。
+ */
 class EloquentLikeRepository implements LikeRepositoryInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function exists(string $userId, string $postId): bool
     {
         return LikeModel::where('user_id', $userId)
@@ -18,6 +24,9 @@ class EloquentLikeRepository implements LikeRepositoryInterface
             ->exists();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(string $userId, string $postId): void
     {
         LikeModel::create([
@@ -26,6 +35,9 @@ class EloquentLikeRepository implements LikeRepositoryInterface
         ]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete(string $userId, string $postId): void
     {
         LikeModel::where('user_id', $userId)
@@ -33,6 +45,9 @@ class EloquentLikeRepository implements LikeRepositoryInterface
             ->delete();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getLikedPostsByUserId(string $userId, ?string $authUserId = null, int $limit = 20): array
     {
         $postIds = LikeModel::where('user_id', $userId)
@@ -57,6 +72,12 @@ class EloquentLikeRepository implements LikeRepositoryInterface
             ->all();
     }
 
+    /**
+     * PostモデルからPostエンティティを生成する。
+     *
+     * @param  PostModel  $model  投稿モデル
+     * @param  string|null  $authUserId  認証ユーザーID
+     */
     private function toPostEntity(PostModel $model, ?string $authUserId): PostEntity
     {
         $likedByAuthUser = $authUserId

@@ -10,6 +10,9 @@ use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
 use App\Domain\User\Entities\User;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 
+/**
+ * ユーザープロフィールと関連データ（投稿・リプライ・いいね・フォロー）を取得するユースケース。
+ */
 class GetUserProfileUseCase
 {
     private const LIMIT = 20;
@@ -23,6 +26,11 @@ class GetUserProfileUseCase
     ) {}
 
     /**
+     * ユーザープロフィールと関連データを返す。ユーザーが見つからない場合はnullを返す。
+     *
+     * @param  string  $userId  対象ユーザーID
+     * @param  string|null  $authUserId  認証ユーザーID（フォロー・いいね状態の付与に使用）
+     * @param  string|null  $cursor  投稿一覧のページネーションカーソル
      * @return array{user: User, posts: Post[], nextCursor: string|null, hasMore: bool, replies: array, likedPosts: array, followers: array, following: array}|null
      */
     public function execute(string $userId, ?string $authUserId = null, ?string $cursor = null): ?array

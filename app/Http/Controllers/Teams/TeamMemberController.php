@@ -11,10 +11,17 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
+/**
+ * チームメンバーのロール更新・除名を担うコントローラー。
+ */
 class TeamMemberController extends Controller
 {
     /**
-     * Update the specified team member's role.
+     * チームメンバーのロールを更新する。
+     *
+     * @param  UpdateTeamMemberRequest  $request  バリデーション済みリクエスト
+     * @param  Team  $team  対象チーム
+     * @param  User  $user  ロール変更対象ユーザー
      */
     public function update(UpdateTeamMemberRequest $request, Team $team, User $user): RedirectResponse
     {
@@ -33,7 +40,10 @@ class TeamMemberController extends Controller
     }
 
     /**
-     * Remove the specified team member.
+     * チームメンバーを除名する。
+     *
+     * @param  Team  $team  対象チーム
+     * @param  User  $user  除名対象ユーザー
      */
     public function destroy(Team $team, User $user): RedirectResponse
     {

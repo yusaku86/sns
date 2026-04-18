@@ -6,10 +6,13 @@ use App\Rules\ValidTeamInvitation;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * チーム招待承諾のフォームリクエスト。
+ */
 class AcceptTeamInvitationRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
+     * バリデーションルールを返す。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -21,7 +24,9 @@ class AcceptTeamInvitationRequest extends FormRequest
     }
 
     /**
-     * Get the validation data from the request.
+     * バリデーション対象のデータを返す。ルートパラメータの招待を含める。
+     *
+     * @return array<string, mixed>
      */
     public function validationData(): array
     {

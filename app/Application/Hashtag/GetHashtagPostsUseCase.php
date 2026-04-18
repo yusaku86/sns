@@ -5,6 +5,9 @@ namespace App\Application\Hashtag;
 use App\Domain\Post\Entities\Post;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 
+/**
+ * ハッシュタグに紐づく投稿一覧をカーソルページネーション付きで取得するユースケース。
+ */
 class GetHashtagPostsUseCase
 {
     private const LIMIT = 20;
@@ -14,6 +17,11 @@ class GetHashtagPostsUseCase
     ) {}
 
     /**
+     * ハッシュタグの投稿一覧を返す。
+     *
+     * @param  string  $hashtagName  ハッシュタグ名（#なし）
+     * @param  string|null  $authUserId  認証ユーザーID（いいね・リツイート状態の付与に使用）
+     * @param  string|null  $cursor  ページネーションカーソル
      * @return array{posts: Post[], nextCursor: string|null, hasMore: bool}
      */
     public function execute(string $hashtagName, ?string $authUserId = null, ?string $cursor = null): array
@@ -23,6 +31,12 @@ class GetHashtagPostsUseCase
         return $this->paginate($posts);
     }
 
+    /**
+     * カーソルページネーション用の結果配列を組み立てる。
+     *
+     * @param  Post[]  $posts  LIMIT+1件取得した投稿配列
+     * @return array{posts: Post[], nextCursor: string|null, hasMore: bool}
+     */
     private function paginate(array $posts): array
     {
         $hasMore = count($posts) > self::LIMIT;

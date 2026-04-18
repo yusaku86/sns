@@ -7,6 +7,10 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
+/**
+ * トレンドハッシュタグキャッシュを非同期で再構築するジョブ。
+ * ShouldBeUniqueにより60秒以内の重複ディスパッチは抑制される。
+ */
 class UpdateTrendingHashtagsJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
@@ -17,6 +21,11 @@ class UpdateTrendingHashtagsJob implements ShouldBeUnique, ShouldQueue
      */
     public int $uniqueFor = 60;
 
+    /**
+     * ジョブを実行してトレンドキャッシュを再構築する。
+     *
+     * @param  GetTrendingHashtagsUseCase  $useCase  トレンドハッシュタグ取得ユースケース
+     */
     public function handle(GetTrendingHashtagsUseCase $useCase): void
     {
         $useCase->refresh();

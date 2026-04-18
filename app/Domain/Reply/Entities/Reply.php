@@ -5,6 +5,9 @@ namespace App\Domain\Reply\Entities;
 use DateTimeImmutable;
 use JsonSerializable;
 
+/**
+ * リプライドメインエンティティ。元投稿の文脈情報をオプションで保持する。
+ */
 class Reply implements JsonSerializable
 {
     public function __construct(
@@ -21,6 +24,11 @@ class Reply implements JsonSerializable
         public readonly ?string $userProfileImageUrl = null,
     ) {}
 
+    /**
+     * JSONシリアライズ用配列を返す。
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

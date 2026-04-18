@@ -8,12 +8,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * チーム招待メールを送信する通知クラス。
+ */
 class TeamInvitation extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
-     * Create a new notification instance.
+     * 招待モデルを受け取って通知を作成する。
+     *
+     * @param  TeamInvitationModel  $invitation  招待モデル
      */
     public function __construct(public TeamInvitationModel $invitation)
     {
@@ -21,8 +26,9 @@ class TeamInvitation extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
+     * 通知の配信チャンネルを返す。
      *
+     * @param  object  $notifiable  通知先オブジェクト
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -31,7 +37,9 @@ class TeamInvitation extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the mail representation of the notification.
+     * メール通知の内容を生成する。
+     *
+     * @param  object  $notifiable  通知先オブジェクト
      */
     public function toMail(object $notifiable): MailMessage
     {
@@ -48,8 +56,9 @@ class TeamInvitation extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the array representation of the notification.
+     * 通知の配列表現を返す。
      *
+     * @param  object  $notifiable  通知先オブジェクト
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array

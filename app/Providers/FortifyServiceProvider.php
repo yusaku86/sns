@@ -19,10 +19,13 @@ use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseCo
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
+/**
+ * Fortify認証機能のカスタムアクション・ビュー・レート制限を設定するプロバイダー。
+ */
 class FortifyServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * カスタムレスポンスクラスをDIコンテナにバインドする。
      */
     public function register(): void
     {
@@ -32,7 +35,7 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * アクション・ビュー・レート制限を設定する。
      */
     public function boot(): void
     {
@@ -42,7 +45,7 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Fortify actions.
+     * Fortifyのアクションクラスを設定する。
      */
     private function configureActions(): void
     {
@@ -51,7 +54,7 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure Fortify views.
+     * FortifyのビューをInertiaページにマッピングする。
      */
     private function configureViews(): void
     {
@@ -82,7 +85,7 @@ class FortifyServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure rate limiting.
+     * 認証エンドポイントのレート制限を設定する。
      */
     private function configureRateLimiting(): void
     {

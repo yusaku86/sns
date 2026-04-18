@@ -4,6 +4,9 @@ namespace App\Domain\Retweet\Entities;
 
 use DateTimeImmutable;
 
+/**
+ * リツイートドメインエンティティ。ユーザーと投稿の関係を表す。
+ */
 class Retweet
 {
     public function __construct(

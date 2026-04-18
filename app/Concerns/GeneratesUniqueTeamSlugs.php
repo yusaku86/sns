@@ -4,10 +4,18 @@ namespace App\Concerns;
 
 use Illuminate\Support\Str;
 
+/**
+ * チームスラッグの一意生成を提供するトレイト。
+ */
 trait GeneratesUniqueTeamSlugs
 {
     /**
-     * Generate a unique slug for the team.
+     * チーム名からユニークなスラッグを生成する。
+     * 同名スラッグが存在する場合は末尾に連番サフィックスを付与する。
+     *
+     * @param  string  $name  チーム名
+     * @param  string|int|null  $excludeId  自身の更新時に除外するチームID
+     * @return string 生成されたスラッグ
      */
     protected static function generateUniqueTeamSlug(string $name, string|int|null $excludeId = null): string
     {

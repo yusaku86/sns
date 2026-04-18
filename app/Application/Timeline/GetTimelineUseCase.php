@@ -5,6 +5,9 @@ namespace App\Application\Timeline;
 use App\Domain\Post\Entities\Post;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 
+/**
+ * タイムライン投稿一覧をカーソルページネーション付きで取得するユースケース。
+ */
 class GetTimelineUseCase
 {
     private const LIMIT = 20;
@@ -14,6 +17,10 @@ class GetTimelineUseCase
     ) {}
 
     /**
+     * タイムライン投稿一覧を返す。
+     *
+     * @param  string  $userId  対象ユーザーID
+     * @param  string|null  $cursor  ページネーションカーソル（前回レスポンスの nextCursor）
      * @return array{posts: Post[], nextCursor: string|null, hasMore: bool}
      */
     public function execute(string $userId, ?string $cursor = null): array
@@ -23,6 +30,12 @@ class GetTimelineUseCase
         return $this->paginate($posts);
     }
 
+    /**
+     * カーソルページネーション用の結果配列を組み立てる。
+     *
+     * @param  Post[]  $posts  LIMIT+1件取得した投稿配列
+     * @return array{posts: Post[], nextCursor: string|null, hasMore: bool}
+     */
     private function paginate(array $posts): array
     {
         $hasMore = count($posts) > self::LIMIT;

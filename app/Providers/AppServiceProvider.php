@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Application\Post\PostImageStorageInterface;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Hashtag\Repositories\HashtagRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
+use App\Domain\Post\Repositories\PostImageRepositoryInterface;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
 use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
@@ -14,10 +16,12 @@ use App\Infrastructure\Eloquent\Observers\PostObserver;
 use App\Infrastructure\Eloquent\Repositories\EloquentFollowRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentHashtagRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentLikeRepository;
+use App\Infrastructure\Eloquent\Repositories\EloquentPostImageRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentPostRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentReplyRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentRetweetRepository;
 use App\Infrastructure\Eloquent\Repositories\EloquentUserRepository;
+use App\Infrastructure\Storage\PostImageStorage;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Date;
@@ -25,15 +29,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * アプリケーションのサービスコンテナバインディングとブートストラップを担うプロバイダー。
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * リポジトリインターフェースと実装クラスをDIコンテナにバインドする。
      */
     public function register(): void
     {
         $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
         $this->app->bind(PostRepositoryInterface::class, EloquentPostRepository::class);
+        $this->app->bind(PostImageRepositoryInterface::class, EloquentPostImageRepository::class);
+        $this->app->bind(PostImageStorageInterface::class, PostImageStorage::class);
         $this->app->bind(LikeRepositoryInterface::class, EloquentLikeRepository::class);
         $this->app->bind(FollowRepositoryInterface::class, EloquentFollowRepository::class);
         $this->app->bind(ReplyRepositoryInterface::class, EloquentReplyRepository::class);
@@ -42,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * オブザーバー登録・デフォルト設定・ファクトリ名解決を初期化する。
      */
     public function boot(): void
     {
@@ -52,12 +61,11 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure default behaviors for production-ready applications.
+     * Infrastructure層モデルに対するFactory名を正しく解決するよう設定する。
+     * App\Infrastructure\Eloquent\Models\User → Database\Factories\UserFactory
      */
     protected function configureFactories(): void
     {
-        // Infrastructure層のモデルに対するFactory名を正しく解決する
-        // App\Infrastructure\Eloquent\Models\User → Database\Factories\UserFactory
         Factory::guessFactoryNamesUsing(function (string $modelName) {
             $infraPrefix = 'App\\Infrastructure\\Eloquent\\Models\\';
 
@@ -69,6 +77,9 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * 日付・DBセーフガード・パスワードポリシーのデフォルトを設定する。
+     */
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);

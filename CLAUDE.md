@@ -180,6 +180,68 @@ import { timeline } from '@/routes';
 
 ---
 
+## PHPDocコメント規約
+
+プロジェクト内のすべてのPHPクラス（Laravelデフォルト・ライブラリファイルを除く）は、以下のPHPDocを必須とする。
+
+### 対象ファイル
+
+`app/` 配下の以下ディレクトリ（`app/Models/` はInfrastructureの薄いラッパーのため除外）:
+
+- `app/Domain/`
+- `app/Application/`
+- `app/Infrastructure/`
+- `app/Http/`
+- `app/Jobs/`
+- `app/Policies/`
+- `app/Providers/`
+- `app/Rules/`
+- `app/Support/`
+- `app/Actions/`
+- `app/Concerns/`
+- `app/Enums/`
+- `app/Notifications/`
+
+### 必須コメントの種類
+
+#### クラスレベル
+
+```php
+/**
+ * クラスの責務を1〜2行で説明する。
+ */
+class FooUseCase
+```
+
+#### メソッド
+
+```php
+/**
+ * メソッドが何をするかを1行で説明する。
+ *
+ * @param SomeType $param 説明
+ * @return ReturnType 説明
+ * @throws SomeException 例外が発生する条件
+ */
+public function handle(SomeType $param): ReturnType
+```
+
+#### プロパティ（コンストラクタインジェクション以外）
+
+```php
+/** プロパティの説明 */
+private string $foo;
+```
+
+### ルール
+
+- コンストラクタの引数にPHPDocは不要（型宣言で十分）
+- `@param` / `@return` は型が自明でも省略しない
+- 説明文は日本語で書く
+- インターフェースのメソッドにもPHPDocを付ける（実装クラスは `{@inheritdoc}` 可）
+
+---
+
 ## 参照ドキュメント
 
 - 要件定義: `requirements.md`

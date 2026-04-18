@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/**
+ * チームメンバーのロールを表す列挙型。
+ */
 enum TeamRole: string
 {
     case Owner = 'owner';
@@ -9,7 +12,7 @@ enum TeamRole: string
     case Member = 'member';
 
     /**
-     * Get the display label for the role.
+     * ロールの表示名を返す。
      */
     public function label(): string
     {
@@ -17,7 +20,7 @@ enum TeamRole: string
     }
 
     /**
-     * Get all the permissions for this role.
+     * ロールが持つ権限の一覧を返す。
      *
      * @return array<TeamPermission>
      */
@@ -35,7 +38,9 @@ enum TeamRole: string
     }
 
     /**
-     * Determine if the role has the given permission.
+     * 指定権限を持っているか確認する。
+     *
+     * @param  TeamPermission  $permission  確認する権限
      */
     public function hasPermission(TeamPermission $permission): bool
     {
@@ -43,8 +48,7 @@ enum TeamRole: string
     }
 
     /**
-     * Get the hierarchy level for this role.
-     * Higher numbers indicate higher privileges.
+     * ロールの階層レベルを返す。数値が高いほど権限が強い。
      */
     public function level(): int
     {
@@ -56,7 +60,9 @@ enum TeamRole: string
     }
 
     /**
-     * Check if this role is at least as privileged as another role.
+     * 指定ロール以上の権限を持っているか確認する。
+     *
+     * @param  TeamRole  $role  比較対象のロール
      */
     public function isAtLeast(TeamRole $role): bool
     {
@@ -64,7 +70,7 @@ enum TeamRole: string
     }
 
     /**
-     * Get the roles that can be assigned to team members (excludes Owner).
+     * メンバーに割り当て可能なロール一覧を返す（Owner除く）。
      *
      * @return array<array{value: string, label: string}>
      */

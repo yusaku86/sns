@@ -1,5 +1,7 @@
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
+import PostImages from '@/components/post-images';
+import type { PostImageData } from '@/components/post-images';
 import { show as showHashtag } from '@/routes/hashtags';
 import { store as likePost, destroy as unlikePost } from '@/routes/likes';
 import { show as showPost, destroy as destroyPost } from '@/routes/posts';
@@ -26,6 +28,7 @@ type Post = {
     retweetedByUserHandle?: string | null;
     hashtags?: string[];
     userProfileImageUrl?: string | null;
+    images?: PostImageData[];
 };
 
 type AuthUser = { id: string } | null;
@@ -143,6 +146,11 @@ export default function PostCard({ post }: { post: Post }) {
                             ),
                         )}
                     </p>
+
+                    {/* 画像 */}
+                    {post.images && post.images.length > 0 && (
+                        <PostImages images={post.images} />
+                    )}
 
                     {/* アクション行 */}
                     <div className="mt-3 flex items-center gap-6">

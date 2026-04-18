@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
+/**
+ * 新規ユーザー登録とパーソナルチーム作成を担うFortifyアクション。
+ */
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
@@ -20,9 +23,10 @@ class CreateNewUser implements CreatesNewUsers
     }
 
     /**
-     * Validate and create a newly registered user.
+     * 入力をバリデートして新規ユーザーを作成する。
      *
-     * @param  array<string, string>  $input
+     * @param  array<string, string>  $input  登録フォームの入力データ
+     * @return User 作成されたユーザー
      */
     public function create(array $input): User
     {

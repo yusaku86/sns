@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
+ * リプライのEloquentモデル。
+ *
  * @property string $id
  * @property string $post_id
  * @property string $user_id
@@ -47,11 +49,21 @@ class Reply extends Model
         static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
     }
 
+    /**
+     * リプライ先の投稿へのリレーション。
+     *
+     * @return BelongsTo<Post, $this>
+     */
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
     }
 
+    /**
+     * リプライ投稿者へのリレーション。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

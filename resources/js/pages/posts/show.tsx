@@ -1,4 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import PostImages from '@/components/post-images';
+import type { PostImageData } from '@/components/post-images';
 import { store as storeReply } from '@/routes/replies';
 import { show as showUser } from '@/routes/users';
 
@@ -13,6 +15,7 @@ type Post = {
     likedByAuthUser: boolean;
     repliesCount: number;
     userProfileImageUrl?: string | null;
+    images?: PostImageData[];
 };
 
 type Reply = {
@@ -168,6 +171,9 @@ export default function PostShow({
                             <p className="mt-3 text-xl leading-7 break-words whitespace-pre-wrap text-[#2b2a28]">
                                 {post.content}
                             </p>
+                            {post.images && post.images.length > 0 && (
+                                <PostImages images={post.images} />
+                            )}
                             <p className="mt-3 text-sm text-[#8a8784]">
                                 {post.createdAt}
                             </p>

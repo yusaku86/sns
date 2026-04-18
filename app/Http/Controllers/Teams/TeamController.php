@@ -16,10 +16,16 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * チームのCRUD操作とスイッチを担うコントローラー。
+ */
 class TeamController extends Controller
 {
     /**
-     * Display a listing of the user's teams.
+     * ユーザーのチーム一覧ページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @return Response Inertiaレスポンス
      */
     public function index(Request $request): Response
     {
@@ -31,7 +37,10 @@ class TeamController extends Controller
     }
 
     /**
-     * Store a newly created team.
+     * 新規チームを作成する。
+     *
+     * @param  SaveTeamRequest  $request  バリデーション済みリクエスト
+     * @param  CreateTeam  $createTeam  チーム作成アクション
      */
     public function store(SaveTeamRequest $request, CreateTeam $createTeam): RedirectResponse
     {
@@ -43,7 +52,11 @@ class TeamController extends Controller
     }
 
     /**
-     * Show the team edit page.
+     * チーム編集ページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @param  Team  $team  対象チーム
+     * @return Response Inertiaレスポンス
      */
     public function edit(Request $request, Team $team): Response
     {
@@ -80,7 +93,10 @@ class TeamController extends Controller
     }
 
     /**
-     * Update the specified team.
+     * チーム情報を更新する。
+     *
+     * @param  SaveTeamRequest  $request  バリデーション済みリクエスト
+     * @param  Team  $team  対象チーム
      */
     public function update(SaveTeamRequest $request, Team $team): RedirectResponse
     {
@@ -100,7 +116,10 @@ class TeamController extends Controller
     }
 
     /**
-     * Switch the user's current team.
+     * 現在のチームを切り替える。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @param  Team  $team  切り替え先チーム
      */
     public function switch(Request $request, Team $team): RedirectResponse
     {
@@ -112,7 +131,10 @@ class TeamController extends Controller
     }
 
     /**
-     * Delete the specified team.
+     * チームを削除する。
+     *
+     * @param  DeleteTeamRequest  $request  バリデーション済みリクエスト
+     * @param  Team  $team  削除対象チーム
      */
     public function destroy(DeleteTeamRequest $request, Team $team): RedirectResponse
     {

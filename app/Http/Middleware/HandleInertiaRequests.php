@@ -7,6 +7,9 @@ use App\Infrastructure\Eloquent\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
+/**
+ * Inertiaの共有データ（認証ユーザー・チーム・トレンドハッシュタグ）を設定するミドルウェア。
+ */
 class HandleInertiaRequests extends Middleware
 {
     /**
@@ -26,6 +29,8 @@ class HandleInertiaRequests extends Middleware
      * Determines the current asset version.
      *
      * @see https://inertiajs.com/asset-versioning
+     *
+     * @param  Request  $request  HTTPリクエスト
      */
     public function version(Request $request): ?string
     {
@@ -37,6 +42,7 @@ class HandleInertiaRequests extends Middleware
      *
      * @see https://inertiajs.com/shared-data
      *
+     * @param  Request  $request  HTTPリクエスト
      * @return array<string, mixed>
      */
     public function share(Request $request): array
@@ -58,9 +64,10 @@ class HandleInertiaRequests extends Middleware
 
     /**
      * フロントエンドに必要なフィールドのみを渡す。
-     * Eloquent モデルを直接渡すと不要なフィールドが露出するリスクがあるため
+     * Eloquentモデルを直接渡すと不要なフィールドが露出するリスクがあるため
      * 明示的に許可したフィールドのみシリアライズする。
      *
+     * @param  User  $user  認証ユーザーモデル
      * @return array<string, mixed>
      */
     private function serializeUser(User $user): array

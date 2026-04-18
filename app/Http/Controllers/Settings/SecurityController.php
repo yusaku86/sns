@@ -12,10 +12,15 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Fortify\Features;
 
+/**
+ * アカウント設定のセキュリティ（パスワード・2FA）を担うコントローラー。
+ */
 class SecurityController extends Controller implements HasMiddleware
 {
     /**
-     * Get the middleware that should be assigned to the controller.
+     * コントローラーに割り当てるミドルウェアを返す。
+     *
+     * @return Middleware[]
      */
     public static function middleware(): array
     {
@@ -26,7 +31,10 @@ class SecurityController extends Controller implements HasMiddleware
     }
 
     /**
-     * Show the user's security settings page.
+     * セキュリティ設定ページを表示する。
+     *
+     * @param  TwoFactorAuthenticationRequest  $request  バリデーション済みリクエスト
+     * @return Response Inertiaレスポンス
      */
     public function edit(TwoFactorAuthenticationRequest $request): Response
     {
@@ -45,7 +53,9 @@ class SecurityController extends Controller implements HasMiddleware
     }
 
     /**
-     * Update the user's password.
+     * ユーザーのパスワードを更新する。
+     *
+     * @param  PasswordUpdateRequest  $request  バリデーション済みリクエスト
      */
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {

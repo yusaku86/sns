@@ -6,8 +6,14 @@ use App\Domain\Follow\Entities\FollowUser;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\Follow as FollowModel;
 
+/**
+ * Eloquentを使ったフォローリポジトリの実装。
+ */
 class EloquentFollowRepository implements FollowRepositoryInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function exists(string $followerId, string $followingId): bool
     {
         return FollowModel::where('follower_id', $followerId)
@@ -15,6 +21,9 @@ class EloquentFollowRepository implements FollowRepositoryInterface
             ->exists();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(string $followerId, string $followingId): void
     {
         FollowModel::create([
@@ -23,6 +32,9 @@ class EloquentFollowRepository implements FollowRepositoryInterface
         ]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete(string $followerId, string $followingId): void
     {
         FollowModel::where('follower_id', $followerId)
@@ -30,6 +42,9 @@ class EloquentFollowRepository implements FollowRepositoryInterface
             ->delete();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getFollowers(string $userId, ?string $authUserId = null): array
     {
         $follows = FollowModel::where('following_id', $userId)
@@ -60,6 +75,9 @@ class EloquentFollowRepository implements FollowRepositoryInterface
         })->all();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getFollowing(string $userId, ?string $authUserId = null): array
     {
         $follows = FollowModel::where('follower_id', $userId)

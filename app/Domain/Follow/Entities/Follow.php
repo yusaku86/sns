@@ -4,6 +4,9 @@ namespace App\Domain\Follow\Entities;
 
 use DateTimeImmutable;
 
+/**
+ * フォロー関係を表すドメインエンティティ。
+ */
 class Follow
 {
     public function __construct(
