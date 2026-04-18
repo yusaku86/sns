@@ -248,7 +248,9 @@ export default function UserShow({
                     <div className="border-b border-[#E5E7EB] px-4 pb-4">
                         <div className="flex items-end justify-between gap-4">
                             {/* アバター 96px（ヘッダー画像に半分かかる） */}
-                            <div className="relative z-10 -mt-12 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-[#f6f3ee] bg-[#3a6c72] text-2xl font-semibold text-white">
+                            <div
+                                className={`relative z-10 -mt-12 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-[#f6f3ee] text-2xl font-semibold text-white ${user.profileImageUrl ? 'bg-[#f6f3ee]' : 'bg-[#3a6c72]'}`}
+                            >
                                 {user.profileImageUrl ? (
                                     <img
                                         src={user.profileImageUrl}

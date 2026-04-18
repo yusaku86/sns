@@ -1,10 +1,9 @@
 import { Form } from '@inertiajs/react';
+import { AlertTriangle } from 'lucide-react';
 import { useRef } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogClose,
@@ -21,44 +20,57 @@ export default function DeleteUser() {
 
     return (
         <div className="space-y-6">
-            <Heading
-                variant="small"
-                title="Delete account"
-                description="Delete your account and all of its resources"
-            />
-            <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                    <p className="font-medium">Warning</p>
-                    <p className="text-sm">
-                        Please proceed with caution, this cannot be undone.
-                    </p>
+            <div>
+                <h2 className="text-base font-semibold text-gray-900">
+                    アカウントを削除する
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    アカウントとすべてのデータを完全に削除します
+                </p>
+            </div>
+
+            <div className="space-y-4 rounded-lg border border-red-200 bg-red-50 p-4">
+                <div className="flex items-start gap-2 text-red-600">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="space-y-1">
+                        <p className="text-sm font-semibold">
+                            この操作は取り消すことができません
+                        </p>
+                        <p className="text-sm">
+                            アカウントを削除すると、以下のデータがすべて失われます：
+                        </p>
+                        <ul className="mt-1 list-inside list-disc space-y-0.5 text-sm">
+                            <li>投稿・メディア</li>
+                            <li>フォロワー・フォロー中のリスト</li>
+                            <li>ブックマーク・メッセージ履歴</li>
+                            <li>プロフィール情報・設定</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button
-                            variant="destructive"
+                        <button
+                            type="button"
                             data-test="delete-user-button"
+                            className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                            style={{ backgroundColor: '#dc2626' }}
                         >
-                            Delete account
-                        </Button>
+                            アカウントを削除する
+                        </button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogTitle>
-                            Are you sure you want to delete your account?
+                            本当にアカウントを削除しますか？
                         </DialogTitle>
                         <DialogDescription>
-                            Once your account is deleted, all of its resources
-                            and data will also be permanently deleted. Please
-                            enter your password to confirm you would like to
-                            permanently delete your account.
+                            アカウントを削除すると、すべてのデータが完全に失われます。
+                            続行するにはパスワードを入力してください。
                         </DialogDescription>
 
                         <Form
                             {...ProfileController.destroy.form()}
-                            options={{
-                                preserveScroll: true,
-                            }}
+                            options={{ preserveScroll: true }}
                             onError={() => passwordInput.current?.focus()}
                             resetOnSuccess
                             className="space-y-6"
@@ -70,44 +82,41 @@ export default function DeleteUser() {
                                             htmlFor="password"
                                             className="sr-only"
                                         >
-                                            Password
+                                            パスワード
                                         </Label>
-
                                         <PasswordInput
                                             id="password"
                                             name="password"
                                             ref={passwordInput}
-                                            placeholder="Password"
+                                            placeholder="パスワード"
                                             autoComplete="current-password"
                                         />
-
                                         <InputError message={errors.password} />
                                     </div>
 
                                     <DialogFooter className="gap-2">
                                         <DialogClose asChild>
-                                            <Button
-                                                variant="secondary"
+                                            <button
+                                                type="button"
+                                                className="rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
                                                 onClick={() =>
                                                     resetAndClearErrors()
                                                 }
                                             >
-                                                Cancel
-                                            </Button>
-                                        </DialogClose>
-
-                                        <Button
-                                            variant="destructive"
-                                            disabled={processing}
-                                            asChild
-                                        >
-                                            <button
-                                                type="submit"
-                                                data-test="confirm-delete-user-button"
-                                            >
-                                                Delete account
+                                                キャンセル
                                             </button>
-                                        </Button>
+                                        </DialogClose>
+                                        <button
+                                            type="submit"
+                                            disabled={processing}
+                                            data-test="confirm-delete-user-button"
+                                            className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                                            style={{
+                                                backgroundColor: '#dc2626',
+                                            }}
+                                        >
+                                            削除する
+                                        </button>
                                     </DialogFooter>
                                 </>
                             )}

@@ -20,6 +20,8 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->profileRules($this->user()->id);
+        return [
+            'email' => $this->emailRules($this->user()->id),
+        ];
     }
 }

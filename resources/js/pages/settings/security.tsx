@@ -2,13 +2,10 @@ import { Form, Head } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import { edit } from '@/routes/security';
 import { disable, enable } from '@/routes/two-factor';
@@ -51,16 +48,22 @@ export default function Security({
 
     return (
         <>
-            <Head title="Security settings" />
+            <Head title="セキュリティ設定" />
 
-            <h1 className="sr-only">Security settings</h1>
+            <h1 className="sr-only">セキュリティ設定</h1>
 
-            <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
-                />
+            <div className="space-y-8">
+                <div>
+                    <h2
+                        className="text-base font-semibold"
+                        style={{ color: '#1a1a1a' }}
+                    >
+                        パスワードの変更
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        安全を保つため、推測されにくいランダムなパスワードを設定してください
+                    </p>
+                </div>
 
                 <Form
                     {...SecurityController.update.form()}
@@ -82,53 +85,88 @@ export default function Security({
                             currentPasswordInput.current?.focus();
                         }
                     }}
-                    className="space-y-6"
+                    className="space-y-5"
                 >
                     {({ errors, processing }) => (
                         <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="current_password">
-                                    Current password
-                                </Label>
+                            <div className="flex flex-col gap-1.5">
+                                <label
+                                    htmlFor="current_password"
+                                    className="text-sm font-medium"
+                                    style={{ color: '#374151' }}
+                                >
+                                    現在のパスワード
+                                </label>
 
                                 <PasswordInput
                                     id="current_password"
                                     ref={currentPasswordInput}
                                     name="current_password"
-                                    className="mt-1 block w-full"
+                                    className="w-full rounded-lg border px-4 py-2.5 text-sm transition outline-none focus:ring-2"
+                                    style={{
+                                        borderColor: '#d1d5db',
+                                        backgroundColor: '#ffffff',
+                                        color: '#111827',
+                                        // @ts-expect-error css variable
+                                        '--tw-ring-color': '#2c5f5d',
+                                    }}
                                     autoComplete="current-password"
-                                    placeholder="Current password"
+                                    placeholder="現在のパスワード"
                                 />
 
                                 <InputError message={errors.current_password} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">New password</Label>
+                            <div className="flex flex-col gap-1.5">
+                                <label
+                                    htmlFor="password"
+                                    className="text-sm font-medium"
+                                    style={{ color: '#374151' }}
+                                >
+                                    新しいパスワード
+                                </label>
 
                                 <PasswordInput
                                     id="password"
                                     ref={passwordInput}
                                     name="password"
-                                    className="mt-1 block w-full"
+                                    className="w-full rounded-lg border px-4 py-2.5 text-sm transition outline-none focus:ring-2"
+                                    style={{
+                                        borderColor: '#d1d5db',
+                                        backgroundColor: '#ffffff',
+                                        color: '#111827',
+                                        // @ts-expect-error css variable
+                                        '--tw-ring-color': '#2c5f5d',
+                                    }}
                                     autoComplete="new-password"
-                                    placeholder="New password"
+                                    placeholder="新しいパスワード"
                                 />
 
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
-                                    Confirm password
-                                </Label>
+                            <div className="flex flex-col gap-1.5">
+                                <label
+                                    htmlFor="password_confirmation"
+                                    className="text-sm font-medium"
+                                    style={{ color: '#374151' }}
+                                >
+                                    新しいパスワード（確認）
+                                </label>
 
                                 <PasswordInput
                                     id="password_confirmation"
                                     name="password_confirmation"
-                                    className="mt-1 block w-full"
+                                    className="w-full rounded-lg border px-4 py-2.5 text-sm transition outline-none focus:ring-2"
+                                    style={{
+                                        borderColor: '#d1d5db',
+                                        backgroundColor: '#ffffff',
+                                        color: '#111827',
+                                        // @ts-expect-error css variable
+                                        '--tw-ring-color': '#2c5f5d',
+                                    }}
                                     autoComplete="new-password"
-                                    placeholder="Confirm password"
+                                    placeholder="新しいパスワード（確認）"
                                 />
 
                                 <InputError
@@ -136,13 +174,16 @@ export default function Security({
                                 />
                             </div>
 
-                            <div className="flex items-center gap-4">
-                                <Button
+                            <div>
+                                <button
+                                    type="submit"
                                     disabled={processing}
                                     data-test="update-password-button"
+                                    className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                                    style={{ backgroundColor: '#2c5f5d' }}
                                 >
-                                    Save password
-                                </Button>
+                                    パスワードを変更
+                                </button>
                             </div>
                         </>
                     )}
@@ -150,90 +191,113 @@ export default function Security({
             </div>
 
             {canManageTwoFactor && (
-                <div className="space-y-6">
-                    <Heading
-                        variant="small"
-                        title="Two-factor authentication"
-                        description="Manage your two-factor authentication settings"
+                <>
+                    <div
+                        className="my-8 border-t"
+                        style={{ borderColor: '#e5e7eb' }}
                     />
-                    {twoFactorEnabled ? (
-                        <div className="flex flex-col items-start justify-start space-y-4">
-                            <p className="text-sm text-muted-foreground">
-                                You will be prompted for a secure, random pin
-                                during login, which you can retrieve from the
-                                TOTP-supported application on your phone.
+
+                    <div className="space-y-8">
+                        <div>
+                            <h2
+                                className="text-base font-semibold"
+                                style={{ color: '#1a1a1a' }}
+                            >
+                                二段階認証
+                            </h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                二段階認証の設定を管理します
                             </p>
-
-                            <div className="relative inline">
-                                <Form {...disable.form()}>
-                                    {({ processing }) => (
-                                        <Button
-                                            variant="destructive"
-                                            type="submit"
-                                            disabled={processing}
-                                        >
-                                            Disable 2FA
-                                        </Button>
-                                    )}
-                                </Form>
-                            </div>
-
-                            <TwoFactorRecoveryCodes
-                                recoveryCodesList={recoveryCodesList}
-                                fetchRecoveryCodes={fetchRecoveryCodes}
-                                errors={errors}
-                            />
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-start justify-start space-y-4">
-                            <p className="text-sm text-muted-foreground">
-                                When you enable two-factor authentication, you
-                                will be prompted for a secure pin during login.
-                                This pin can be retrieved from a TOTP-supported
-                                application on your phone.
-                            </p>
 
-                            <div>
-                                {hasSetupData ? (
-                                    <Button
-                                        onClick={() => setShowSetupModal(true)}
-                                    >
-                                        <ShieldCheck />
-                                        Continue setup
-                                    </Button>
-                                ) : (
-                                    <Form
-                                        {...enable.form()}
-                                        onSuccess={() =>
-                                            setShowSetupModal(true)
-                                        }
-                                    >
+                        {twoFactorEnabled ? (
+                            <div className="flex flex-col items-start justify-start space-y-4">
+                                <p className="text-sm text-muted-foreground">
+                                    ログイン時にスマートフォンのTOTPアプリからワンタイムパスワードの入力が求められます。
+                                </p>
+
+                                <div className="relative inline">
+                                    <Form {...disable.form()}>
                                         {({ processing }) => (
-                                            <Button
+                                            <button
                                                 type="submit"
                                                 disabled={processing}
+                                                className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                                                style={{
+                                                    backgroundColor: '#dc2626',
+                                                }}
                                             >
-                                                Enable 2FA
-                                            </Button>
+                                                二段階認証を無効にする
+                                            </button>
                                         )}
                                     </Form>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                                </div>
 
-                    <TwoFactorSetupModal
-                        isOpen={showSetupModal}
-                        onClose={() => setShowSetupModal(false)}
-                        requiresConfirmation={requiresConfirmation}
-                        twoFactorEnabled={twoFactorEnabled}
-                        qrCodeSvg={qrCodeSvg}
-                        manualSetupKey={manualSetupKey}
-                        clearSetupData={clearSetupData}
-                        fetchSetupData={fetchSetupData}
-                        errors={errors}
-                    />
-                </div>
+                                <TwoFactorRecoveryCodes
+                                    recoveryCodesList={recoveryCodesList}
+                                    fetchRecoveryCodes={fetchRecoveryCodes}
+                                    errors={errors}
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-start justify-start space-y-4">
+                                <p className="text-sm text-muted-foreground">
+                                    二段階認証を有効にすると、ログイン時にスマートフォンのTOTPアプリからワンタイムパスワードの入力が求められます。
+                                </p>
+
+                                <div>
+                                    {hasSetupData ? (
+                                        <button
+                                            onClick={() =>
+                                                setShowSetupModal(true)
+                                            }
+                                            className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+                                            style={{
+                                                backgroundColor: '#2c5f5d',
+                                            }}
+                                        >
+                                            <ShieldCheck className="h-4 w-4" />
+                                            設定を続ける
+                                        </button>
+                                    ) : (
+                                        <Form
+                                            {...enable.form()}
+                                            onSuccess={() =>
+                                                setShowSetupModal(true)
+                                            }
+                                        >
+                                            {({ processing }) => (
+                                                <button
+                                                    type="submit"
+                                                    disabled={processing}
+                                                    className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                                                    style={{
+                                                        backgroundColor:
+                                                            '#2c5f5d',
+                                                    }}
+                                                >
+                                                    二段階認証を有効にする
+                                                </button>
+                                            )}
+                                        </Form>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        <TwoFactorSetupModal
+                            isOpen={showSetupModal}
+                            onClose={() => setShowSetupModal(false)}
+                            requiresConfirmation={requiresConfirmation}
+                            twoFactorEnabled={twoFactorEnabled}
+                            qrCodeSvg={qrCodeSvg}
+                            manualSetupKey={manualSetupKey}
+                            clearSetupData={clearSetupData}
+                            fetchSetupData={fetchSetupData}
+                            errors={errors}
+                        />
+                    </div>
+                </>
             )}
         </>
     );
@@ -242,7 +306,7 @@ export default function Security({
 Security.layout = {
     breadcrumbs: [
         {
-            title: 'Security settings',
+            title: 'セキュリティ設定',
             href: edit(),
         },
     ],

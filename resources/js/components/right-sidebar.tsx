@@ -1,5 +1,8 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import { explore } from '@/routes';
 import { show } from '@/routes/hashtags';
 
 type TrendingHashtag = {
@@ -15,19 +18,47 @@ const suggestedUsers = [
 ];
 
 export default function RightSidebar() {
-    const { trendingHashtags } = usePage<{
+    const page = usePage<{
         trendingHashtags: TrendingHashtag[];
-    }>().props;
+        query?: string;
+    }>();
+    const { trendingHashtags } = page.props;
+    const currentQuery = page.props.query ?? '';
+
+    const [searchInput, setSearchInput] = useState(currentQuery);
+
+    useEffect(() => {
+        setSearchInput(currentQuery);
+    }, [currentQuery]);
+
+    const handleSearch = (e: FormEvent) => {
+        e.preventDefault();
+
+        const q = searchInput.trim();
+
+        if (q === '') {
+            router.visit(explore.url());
+        } else {
+            router.visit(explore.url({ query: { q } }));
+        }
+    };
 
     return (
         <div className="space-y-6 py-4">
             {/* 検索バー */}
-            <div className="flex items-center gap-2 rounded-md bg-[#eae4dc] px-3 py-3">
+            <form
+                onSubmit={handleSearch}
+                className="flex items-center gap-2 rounded-md bg-[#eae4dc] px-3 py-3"
+            >
                 <Search size={17} className="shrink-0 text-[#8a8784]" />
-                <span className="text-base text-[#8a8784]">
-                    キーワードを検索
-                </span>
-            </div>
+                <input
+                    type="text"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    placeholder="キーワードを検索"
+                    className="flex-1 bg-transparent text-base text-[#191816] placeholder-[#8a8784] outline-none"
+                />
+            </form>
 
             {/* フォロワーも知っている */}
             <div>

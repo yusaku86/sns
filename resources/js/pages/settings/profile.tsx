@@ -1,11 +1,8 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { Mail } from 'lucide-react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
@@ -20,102 +17,100 @@ export default function Profile({
 
     return (
         <>
-            <Head title="Profile settings" />
+            <Head title="アカウント設定" />
 
-            <h1 className="sr-only">Profile settings</h1>
+            <h1 className="sr-only">アカウント設定</h1>
 
-            <div className="space-y-6">
-                <Heading
-                    variant="small"
-                    title="Profile information"
-                    description="Update your name and email address"
-                />
+            <div className="space-y-8">
+                <div>
+                    <h2
+                        className="text-base font-semibold"
+                        style={{ color: '#1a1a1a' }}
+                    >
+                        メールアドレス
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        ログインに使用するメールアドレスを変更できます
+                    </p>
+                </div>
 
                 <Form
                     {...ProfileController.update.form()}
-                    options={{
-                        preserveScroll: true,
-                    }}
-                    className="space-y-6"
+                    options={{ preserveScroll: true }}
+                    className="space-y-5"
                 >
                     {({ processing, errors }) => (
                         <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
-
-                                <Input
-                                    id="name"
-                                    className="mt-1 block w-full"
-                                    defaultValue={auth.user.name}
-                                    name="name"
-                                    required
-                                    autoComplete="name"
-                                    placeholder="Full name"
-                                />
-
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.name}
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
-
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    className="mt-1 block w-full"
-                                    defaultValue={auth.user.email}
-                                    name="email"
-                                    required
-                                    autoComplete="username"
-                                    placeholder="Email address"
-                                />
-
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.email}
-                                />
+                            <div className="flex flex-col gap-1.5">
+                                <label
+                                    htmlFor="email"
+                                    className="text-sm font-medium"
+                                    style={{ color: '#374151' }}
+                                >
+                                    メールアドレス
+                                </label>
+                                <div className="relative">
+                                    <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        name="email"
+                                        required
+                                        autoComplete="username"
+                                        defaultValue={auth.user.email}
+                                        placeholder="example@email.com"
+                                        className="w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm transition outline-none focus:ring-2"
+                                        style={{
+                                            borderColor: '#d1d5db',
+                                            backgroundColor: '#ffffff',
+                                            color: '#111827',
+                                            // @ts-expect-error css variable
+                                            '--tw-ring-color': '#2c5f5d',
+                                        }}
+                                    />
+                                </div>
+                                <InputError message={errors.email} />
                             </div>
 
                             {mustVerifyEmail &&
                                 auth.user.email_verified_at === null && (
                                     <div>
-                                        <p className="-mt-4 text-sm text-muted-foreground">
-                                            Your email address is unverified.{' '}
+                                        <p className="text-sm text-muted-foreground">
+                                            メールアドレスが未確認です。{' '}
                                             <Link
                                                 href={send()}
                                                 as="button"
-                                                className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                                className="underline underline-offset-4 hover:opacity-80"
+                                                style={{ color: '#2c5f5d' }}
                                             >
-                                                Click here to resend the
-                                                verification email.
+                                                確認メールを再送する
                                             </Link>
                                         </p>
-
                                         {status ===
                                             'verification-link-sent' && (
                                             <div className="mt-2 text-sm font-medium text-green-600">
-                                                A new verification link has been
-                                                sent to your email address.
+                                                確認メールを送信しました。
                                             </div>
                                         )}
                                     </div>
                                 )}
 
-                            <div className="flex items-center gap-4">
-                                <Button
+                            <div>
+                                <button
+                                    type="submit"
                                     disabled={processing}
-                                    data-test="update-profile-button"
+                                    className="rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                                    style={{ backgroundColor: '#2c5f5d' }}
                                 >
-                                    Save
-                                </Button>
+                                    変更を保存
+                                </button>
                             </div>
                         </>
                     )}
                 </Form>
             </div>
+
+            <div className="my-8 border-t" style={{ borderColor: '#e5e7eb' }} />
 
             <DeleteUser />
         </>
@@ -125,7 +120,7 @@ export default function Profile({
 Profile.layout = {
     breadcrumbs: [
         {
-            title: 'Profile settings',
+            title: 'アカウント設定',
             href: edit(),
         },
     ],
