@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
+ * 投稿のEloquentモデル。
+ *
  * @property string $id
  * @property string $user_id
  * @property string $content
@@ -57,31 +59,61 @@ class Post extends Model
         static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
     }
 
+    /**
+     * 投稿者ユーザーへのリレーション。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * いいね一覧へのリレーション。
+     *
+     * @return HasMany<Like, $this>
+     */
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
+    /**
+     * リプライ一覧へのリレーション。
+     *
+     * @return HasMany<Reply, $this>
+     */
     public function replies(): HasMany
     {
         return $this->hasMany(Reply::class);
     }
 
+    /**
+     * リツイート一覧へのリレーション。
+     *
+     * @return HasMany<Retweet, $this>
+     */
     public function retweets(): HasMany
     {
         return $this->hasMany(Retweet::class);
     }
 
+    /**
+     * ハッシュタグ一覧へのリレーション。
+     *
+     * @return BelongsToMany<Hashtag, $this>
+     */
     public function hashtags(): BelongsToMany
     {
         return $this->belongsToMany(Hashtag::class);
     }
 
+    /**
+     * 添付画像一覧へのリレーション（表示順でソート）。
+     *
+     * @return HasMany<PostImage, $this>
+     */
     public function images(): HasMany
     {
         return $this->hasMany(PostImage::class)->orderBy('order');

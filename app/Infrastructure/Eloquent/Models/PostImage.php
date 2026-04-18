@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
+ * 投稿添付画像のEloquentモデル。
+ *
  * @property string $id
  * @property string $post_id
  * @property string $path
@@ -32,6 +34,11 @@ class PostImage extends Model
         static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
     }
 
+    /**
+     * 画像が属する投稿へのリレーション。
+     *
+     * @return BelongsTo<Post, $this>
+     */
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);

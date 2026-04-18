@@ -7,10 +7,13 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Validator;
 
+/**
+ * チーム削除のフォームリクエスト。
+ */
 class DeleteTeamRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * リクエストを実行する権限があるか確認する。
      */
     public function authorize(): bool
     {
@@ -18,7 +21,7 @@ class DeleteTeamRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * バリデーションルールを返す。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -30,7 +33,9 @@ class DeleteTeamRequest extends FormRequest
     }
 
     /**
-     * Configure the validator instance.
+     * バリデーション後に実行するコールバックを返す。
+     *
+     * @return array<int, callable>
      */
     public function after(): array
     {

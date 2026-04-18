@@ -7,10 +7,13 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * チームメンバー更新のフォームリクエスト。
+ */
 class UpdateTeamMemberRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
+     * バリデーションルールを返す。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */

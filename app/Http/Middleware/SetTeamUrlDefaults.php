@@ -7,12 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * チームベースルートのURLデフォルトパラメーターを設定するミドルウェア。
+ */
 class SetTeamUrlDefaults
 {
     /**
-     * Set the default URL parameters for team-based routes.
+     * チームスラッグをURLデフォルトパラメーターとして設定する。
      *
-     * @param  Closure(Request): (Response)  $next
+     * @param  Request  $request  HTTPリクエスト
+     * @param  Closure(Request): Response  $next  次のミドルウェア
      */
     public function handle(Request $request, Closure $next): Response
     {

@@ -6,12 +6,15 @@ use App\Concerns\PasswordValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * アカウント削除のフォームリクエスト。
+ */
 class ProfileDeleteRequest extends FormRequest
 {
     use PasswordValidationRules;
 
     /**
-     * Get the validation rules that apply to the request.
+     * バリデーションルールを返す。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */

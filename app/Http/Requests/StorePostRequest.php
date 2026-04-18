@@ -5,13 +5,24 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
+/**
+ * 投稿作成リクエストのバリデーション。テキストまたは画像の少なくとも一方を必須とする。
+ */
 class StorePostRequest extends FormRequest
 {
+    /**
+     * リクエストを認可する。
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * バリデーションルールを返す。
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -21,6 +32,11 @@ class StorePostRequest extends FormRequest
         ];
     }
 
+    /**
+     * テキストと画像の両方が未入力の場合にエラーを追加する追加バリデーション。
+     *
+     * @param  Validator  $validator  バリデーターインスタンス
+     */
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $v) {

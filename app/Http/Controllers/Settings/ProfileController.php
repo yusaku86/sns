@@ -12,10 +12,16 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * アカウント設定のプロフィール編集・削除を担うコントローラー。
+ */
 class ProfileController extends Controller
 {
     /**
-     * Show the user's profile settings page.
+     * プロフィール設定ページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @return Response Inertiaレスポンス
      */
     public function edit(Request $request): Response
     {
@@ -26,7 +32,9 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * ユーザーのプロフィール情報を更新する。
+     *
+     * @param  ProfileUpdateRequest  $request  バリデーション済みリクエスト
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -44,7 +52,9 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's profile.
+     * ユーザーアカウントを削除する。
+     *
+     * @param  ProfileDeleteRequest  $request  バリデーション済みリクエスト
      */
     public function destroy(ProfileDeleteRequest $request): RedirectResponse
     {

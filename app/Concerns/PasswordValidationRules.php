@@ -5,10 +5,13 @@ namespace App\Concerns;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * パスワードバリデーションルールを提供するトレイト。
+ */
 trait PasswordValidationRules
 {
     /**
-     * Get the validation rules used to validate passwords.
+     * 新規パスワードのバリデーションルールを返す。
      *
      * @return array<int, Rule|array<mixed>|string>
      */
@@ -18,7 +21,7 @@ trait PasswordValidationRules
     }
 
     /**
-     * Get the validation rules used to validate the current password.
+     * 現在のパスワード確認のバリデーションルールを返す。
      *
      * @return array<int, Rule|array<mixed>|string>
      */

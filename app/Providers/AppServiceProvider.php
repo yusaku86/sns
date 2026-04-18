@@ -29,10 +29,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * アプリケーションのサービスコンテナバインディングとブートストラップを担うプロバイダー。
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * リポジトリインターフェースと実装クラスをDIコンテナにバインドする。
      */
     public function register(): void
     {
@@ -48,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * オブザーバー登録・デフォルト設定・ファクトリ名解決を初期化する。
      */
     public function boot(): void
     {
@@ -58,12 +61,11 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure default behaviors for production-ready applications.
+     * Infrastructure層モデルに対するFactory名を正しく解決するよう設定する。
+     * App\Infrastructure\Eloquent\Models\User → Database\Factories\UserFactory
      */
     protected function configureFactories(): void
     {
-        // Infrastructure層のモデルに対するFactory名を正しく解決する
-        // App\Infrastructure\Eloquent\Models\User → Database\Factories\UserFactory
         Factory::guessFactoryNamesUsing(function (string $modelName) {
             $infraPrefix = 'App\\Infrastructure\\Eloquent\\Models\\';
 
@@ -75,6 +77,9 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * 日付・DBセーフガード・パスワードポリシーのデフォルトを設定する。
+     */
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);

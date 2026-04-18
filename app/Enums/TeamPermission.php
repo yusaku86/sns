@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/**
+ * チーム操作の権限を表す列挙型。
+ */
 enum TeamPermission: string
 {
     case UpdateTeam = 'team:update';

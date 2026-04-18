@@ -5,6 +5,9 @@ namespace App\Domain\Post\Entities;
 use DateTimeImmutable;
 use JsonSerializable;
 
+/**
+ * 投稿ドメインエンティティ。リツイート・いいね・リプライの集計情報を含む。
+ */
 class Post implements JsonSerializable
 {
     public function __construct(
@@ -30,6 +33,11 @@ class Post implements JsonSerializable
         public readonly array $images = [],
     ) {}
 
+    /**
+     * JSONシリアライズ用配列を返す。
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

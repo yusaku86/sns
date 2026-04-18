@@ -6,12 +6,15 @@ use App\Concerns\ProfileValidationRules;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * プロフィール更新のフォームリクエスト。
+ */
 class ProfileUpdateRequest extends FormRequest
 {
     use ProfileValidationRules;
 
     /**
-     * Get the validation rules that apply to the request.
+     * バリデーションルールを返す。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
+ * チーム招待のEloquentモデル。ランダムコードで招待URLを生成する。
+ *
  * @property string $id
  * @property string $code
  * @property string $team_id
@@ -65,26 +67,45 @@ class TeamInvitation extends Model
         });
     }
 
+    /**
+     * 招待先チームへのリレーション。
+     *
+     * @return BelongsTo<Team, $this>
+     */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /**
+     * 招待を送ったユーザーへのリレーション。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function inviter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'invited_by');
     }
 
+    /**
+     * 招待が承認済みか確認する。
+     */
     public function isAccepted(): bool
     {
         return $this->accepted_at !== null;
     }
 
+    /**
+     * 招待が承認待ち（未承認かつ未期限切れ）か確認する。
+     */
     public function isPending(): bool
     {
         return $this->accepted_at === null && ! $this->isExpired();
     }
 
+    /**
+     * 招待が期限切れか確認する。
+     */
     public function isExpired(): bool
     {
         return $this->expires_at !== null && $this->expires_at->isPast();
@@ -99,6 +120,9 @@ class TeamInvitation extends Model
         ];
     }
 
+    /**
+     * ルートモデルバインディングのキーとしてcodeを使用する。
+     */
     public function getRouteKeyName(): string
     {
         return 'code';

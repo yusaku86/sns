@@ -15,10 +15,13 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 
+/**
+ * ユーザーモデルにチーム関連の機能を追加するトレイト。
+ */
 trait HasTeams
 {
     /**
-     * Get all of the teams the user belongs to.
+     * ユーザーが所属する全チームへのリレーション。
      *
      * @return BelongsToMany<Team, $this>
      */
@@ -30,7 +33,7 @@ trait HasTeams
     }
 
     /**
-     * Get all of the teams the user owns.
+     * ユーザーがオーナーのチーム一覧へのリレーション。
      *
      * @return HasManyThrough<Team, Membership, $this>
      */
@@ -47,7 +50,7 @@ trait HasTeams
     }
 
     /**
-     * Get all of the memberships for the user.
+     * ユーザーのチームメンバーシップ一覧へのリレーション。
      *
      * @return HasMany<Membership, $this>
      */
@@ -57,7 +60,7 @@ trait HasTeams
     }
 
     /**
-     * Get the user's current team.
+     * 現在のチームへのリレーション。
      *
      * @return BelongsTo<Team, $this>
      */
@@ -67,7 +70,7 @@ trait HasTeams
     }
 
     /**
-     * Get the user's personal team.
+     * ユーザーのパーソナルチームを返す。
      */
     public function personalTeam(): ?Team
     {
@@ -77,7 +80,9 @@ trait HasTeams
     }
 
     /**
-     * Switch to the given team.
+     * 指定チームに切り替える。所属していない場合はfalseを返す。
+     *
+     * @param  Team  $team  切り替え先チーム
      */
     public function switchTeam(Team $team): bool
     {
@@ -94,7 +99,9 @@ trait HasTeams
     }
 
     /**
-     * Determine if the user belongs to the given team.
+     * 指定チームに所属しているか確認する。
+     *
+     * @param  Team  $team  対象チーム
      */
     public function belongsToTeam(Team $team): bool
     {
@@ -102,7 +109,9 @@ trait HasTeams
     }
 
     /**
-     * Determine if the given team is the user's current team.
+     * 指定チームが現在のチームか確認する。
+     *
+     * @param  Team  $team  対象チーム
      */
     public function isCurrentTeam(Team $team): bool
     {
@@ -110,7 +119,9 @@ trait HasTeams
     }
 
     /**
-     * Determine if the user is the owner of the given team.
+     * 指定チームのオーナーか確認する。
+     *
+     * @param  Team  $team  対象チーム
      */
     public function ownsTeam(Team $team): bool
     {
@@ -118,7 +129,9 @@ trait HasTeams
     }
 
     /**
-     * Get the user's role on the given team.
+     * 指定チームでのユーザーのロールを返す。
+     *
+     * @param  Team  $team  対象チーム
      */
     public function teamRole(Team $team): ?TeamRole
     {
@@ -129,8 +142,9 @@ trait HasTeams
     }
 
     /**
-     * Get the user's teams as a collection of UserTeam objects.
+     * ユーザーが所属するチームをUserTeamオブジェクトのコレクションで返す。
      *
+     * @param  bool  $includeCurrent  現在のチームを含めるか
      * @return Collection<int, UserTeam>
      */
     public function toUserTeams(bool $includeCurrent = false): Collection
@@ -143,7 +157,9 @@ trait HasTeams
     }
 
     /**
-     * Get the user's team as a UserTeam object.
+     * 指定チームをUserTeamオブジェクトに変換して返す。
+     *
+     * @param  Team  $team  対象チーム
      */
     public function toUserTeam(Team $team): UserTeam
     {
@@ -161,7 +177,9 @@ trait HasTeams
     }
 
     /**
-     * Get the standard permissions for a team as a TeamPermissions object.
+     * 指定チームでのユーザー権限をTeamPermissionsオブジェクトで返す。
+     *
+     * @param  Team  $team  対象チーム
      */
     public function toTeamPermissions(Team $team): TeamPermissions
     {
@@ -178,6 +196,11 @@ trait HasTeams
         );
     }
 
+    /**
+     * 指定チームを除いたフォールバック先チームを返す。
+     *
+     * @param  Team|null  $excluding  除外するチーム
+     */
     public function fallbackTeam(?Team $excluding = null): ?Team
     {
         return $this->teams()
@@ -187,7 +210,10 @@ trait HasTeams
     }
 
     /**
-     * Determine if the user has the given permission on the team.
+     * 指定チームで指定権限を持っているか確認する。
+     *
+     * @param  Team  $team  対象チーム
+     * @param  TeamPermission  $permission  確認する権限
      */
     public function hasTeamPermission(Team $team, TeamPermission $permission): bool
     {

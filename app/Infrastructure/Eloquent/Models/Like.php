@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
+ * いいねのEloquentモデル。updated_atを持たない。
+ *
  * @property string $id
  * @property string $user_id
  * @property string $post_id
@@ -51,11 +53,21 @@ class Like extends Model
         });
     }
 
+    /**
+     * いいねしたユーザーへのリレーション。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * いいねされた投稿へのリレーション。
+     *
+     * @return BelongsTo<Post, $this>
+     */
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);

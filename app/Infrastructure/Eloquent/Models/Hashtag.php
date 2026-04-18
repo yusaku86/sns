@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 /**
+ * ハッシュタグのEloquentモデル。
+ *
  * @property string $id
  * @property string $name
  * @property CarbonImmutable|null $created_at
@@ -40,6 +42,11 @@ class Hashtag extends Model
         static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
     }
 
+    /**
+     * このハッシュタグが付いた投稿一覧へのリレーション。
+     *
+     * @return BelongsToMany<Post, $this>
+     */
     public function posts(): BelongsToMany
     {
         return $this->belongsToMany(Post::class);

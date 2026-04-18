@@ -7,14 +7,18 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
+/**
+ * パスワードリセットのバリデートと保存を担うFortifyアクション。
+ */
 class ResetUserPassword implements ResetsUserPasswords
 {
     use PasswordValidationRules;
 
     /**
-     * Validate and reset the user's forgotten password.
+     * ユーザーのパスワードをバリデートしてリセットする。
      *
-     * @param  array<string, string>  $input
+     * @param  User  $user  パスワードをリセットするユーザー
+     * @param  array<string, string>  $input  フォームの入力データ
      */
     public function reset(User $user, array $input): void
     {

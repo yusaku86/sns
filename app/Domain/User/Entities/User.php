@@ -4,6 +4,9 @@ namespace App\Domain\User\Entities;
 
 use JsonSerializable;
 
+/**
+ * ユーザードメインエンティティ。プロフィール情報とフォロー集計を保持する。
+ */
 class User implements JsonSerializable
 {
     public function __construct(
@@ -21,6 +24,11 @@ class User implements JsonSerializable
         public readonly ?\DateTimeImmutable $createdAt = null,
     ) {}
 
+    /**
+     * JSONシリアライズ用配列を返す。
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

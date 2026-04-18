@@ -13,8 +13,14 @@ use App\Infrastructure\Eloquent\Models\Retweet as RetweetModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Eloquentを使った投稿リポジトリの実装。
+ */
 class EloquentPostRepository implements PostRepositoryInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function findById(string $id, ?string $authUserId = null): ?PostEntity
     {
         $model = PostModel::with(['user', 'hashtags', 'images'])->withCount(['likes', 'replies', 'retweets'])->find($id);
@@ -26,6 +32,9 @@ class EloquentPostRepository implements PostRepositoryInterface
         return $this->toEntity($model, $authUserId);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getTimeline(string $userId, int $limit = 20, ?string $cursor = null): array
     {
         $followingIds = Follow::where('follower_id', $userId)
@@ -67,6 +76,9 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->all();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAll(?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
         $postQuery = PostModel::with(['user', 'hashtags', 'images'])
@@ -103,6 +115,9 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->all();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(PostEntity $post): void
     {
         PostModel::create([
@@ -112,11 +127,17 @@ class EloquentPostRepository implements PostRepositoryInterface
         ]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function delete(string $id): void
     {
         PostModel::destroy($id);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
         $query = PostModel::with(['user', 'hashtags', 'images'])
@@ -138,6 +159,9 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->all();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
     {
         $hashtag = HashtagModel::where('name', $hashtagName)->first();
@@ -168,6 +192,12 @@ class EloquentPostRepository implements PostRepositoryInterface
             ->all();
     }
 
+    /**
+     * RetweetモデルからPostエンティティを生成する。
+     *
+     * @param  RetweetModel  $retweet  リツイートモデル
+     * @param  string|null  $authUserId  認証ユーザーID
+     */
     private function toEntityFromRetweet(RetweetModel $retweet, ?string $authUserId): PostEntity
     {
         $model = $retweet->post;
@@ -204,6 +234,12 @@ class EloquentPostRepository implements PostRepositoryInterface
         );
     }
 
+    /**
+     * PostモデルからPostエンティティを生成する。
+     *
+     * @param  PostModel  $model  投稿モデル
+     * @param  string|null  $authUserId  認証ユーザーID
+     */
     private function toEntity(PostModel $model, ?string $authUserId): PostEntity
     {
         $likedByAuthUser = $authUserId
@@ -234,7 +270,12 @@ class EloquentPostRepository implements PostRepositoryInterface
         );
     }
 
-    /** @return PostImageEntity[] */
+    /**
+     * PostモデルのimagesリレーションからPostImageエンティティ配列を生成する。
+     *
+     * @param  PostModel  $model  投稿モデル
+     * @return PostImageEntity[]
+     */
     private function toImageEntities(PostModel $model): array
     {
         return $model->images

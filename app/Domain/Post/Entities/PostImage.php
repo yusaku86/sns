@@ -2,6 +2,9 @@
 
 namespace App\Domain\Post\Entities;
 
+/**
+ * 投稿に添付された画像のドメインエンティティ。
+ */
 class PostImage
 {
     public function __construct(

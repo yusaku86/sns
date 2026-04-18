@@ -19,6 +19,8 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 /**
+ * ユーザーのEloquentモデル。認証・2FA・チーム機能を含む。
+ *
  * @property string $id
  * @property string $name
  * @property string $handle
@@ -89,6 +91,11 @@ class User extends Authenticatable
 
     protected $appends = ['profile_image_url'];
 
+    /**
+     * プロフィール画像の公開URLを返すアクセサ。
+     *
+     * @return Attribute<string|null, never>
+     */
     protected function profileImageUrl(): Attribute
     {
         return Attribute::make(
@@ -119,21 +126,41 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * 投稿一覧へのリレーション。
+     *
+     * @return HasMany<Post, $this>
+     */
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
     }
 
+    /**
+     * いいね一覧へのリレーション。
+     *
+     * @return HasMany<Like, $this>
+     */
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
+    /**
+     * フォロー中ユーザー一覧へのリレーション。
+     *
+     * @return HasMany<Follow, $this>
+     */
     public function followings(): HasMany
     {
         return $this->hasMany(Follow::class, 'follower_id');
     }
 
+    /**
+     * フォロワー一覧へのリレーション。
+     *
+     * @return HasMany<Follow, $this>
+     */
     public function followers(): HasMany
     {
         return $this->hasMany(Follow::class, 'following_id');

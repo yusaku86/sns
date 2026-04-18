@@ -6,10 +6,15 @@ use App\Enums\TeamPermission;
 use App\Models\Team;
 use App\Models\User;
 
+/**
+ * チームリソースへのアクセス制御ポリシー。
+ */
 class TeamPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * 任意のチームを閲覧できるか判定する（全ユーザー許可）。
+     *
+     * @param  User  $user  認証ユーザー
      */
     public function viewAny(User $user): bool
     {
@@ -17,7 +22,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can view the model.
+     * 指定チームを閲覧できるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function view(User $user, Team $team): bool
     {
@@ -25,7 +33,9 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can create models.
+     * チームを作成できるか判定する（全ユーザー許可）。
+     *
+     * @param  User  $user  認証ユーザー
      */
     public function create(User $user): bool
     {
@@ -33,7 +43,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can update the model.
+     * 指定チームを更新できるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function update(User $user, Team $team): bool
     {
@@ -41,7 +54,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can add a member to the team.
+     * チームにメンバーを追加できるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function addMember(User $user, Team $team): bool
     {
@@ -49,7 +65,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can update a member's role in the team.
+     * チームメンバーのロールを更新できるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function updateMember(User $user, Team $team): bool
     {
@@ -57,7 +76,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can remove a member from the team.
+     * チームメンバーを除名できるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function removeMember(User $user, Team $team): bool
     {
@@ -65,7 +87,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can invite members to the team.
+     * チームに招待を送れるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function inviteMember(User $user, Team $team): bool
     {
@@ -73,7 +98,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can cancel invitations.
+     * チームの招待を取り消せるか判定する。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function cancelInvitation(User $user, Team $team): bool
     {
@@ -81,7 +109,10 @@ class TeamPolicy
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * 指定チームを削除できるか判定する（パーソナルチームは削除不可）。
+     *
+     * @param  User  $user  認証ユーザー
+     * @param  Team  $team  対象チーム
      */
     public function delete(User $user, Team $team): bool
     {

@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Str;
 
 /**
+ * チームメンバーシップのEloquentピボットモデル。
+ *
  * @property string $id
  * @property string $team_id
  * @property string $user_id
@@ -46,11 +48,21 @@ class Membership extends Pivot
         static::creating(fn ($model) => $model->id ??= (string) Str::uuid());
     }
 
+    /**
+     * 所属チームへのリレーション。
+     *
+     * @return BelongsTo<Team, $this>
+     */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /**
+     * メンバーユーザーへのリレーション。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

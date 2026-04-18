@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * ユーザープロフィールの表示・更新を担うコントローラー。
+ */
 class UserController extends Controller
 {
     public function __construct(
@@ -19,6 +22,13 @@ class UserController extends Controller
         private UpdateUserProfileUseCase $updateUserProfile,
     ) {}
 
+    /**
+     * ユーザープロフィールページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @param  User  $user  ルートモデルバインディングで解決したユーザー
+     * @return Response Inertiaレスポンス
+     */
     public function show(Request $request, User $user): Response
     {
         $validated = $request->validate([
@@ -45,6 +55,12 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * ユーザープロフィールを更新する。
+     *
+     * @param  UpdateProfileRequest  $request  バリデーション済みリクエスト
+     * @param  User  $user  ルートモデルバインディングで解決したユーザー
+     */
     public function update(UpdateProfileRequest $request, User $user): RedirectResponse
     {
         $this->updateUserProfile->execute(

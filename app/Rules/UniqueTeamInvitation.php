@@ -8,6 +8,9 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
+/**
+ * チームへの重複招待（既存メンバーや保留中招待）を検証するルール。
+ */
 class UniqueTeamInvitation implements ValidationRule
 {
     public function __construct(protected Team $team)
@@ -16,9 +19,11 @@ class UniqueTeamInvitation implements ValidationRule
     }
 
     /**
-     * Run the validation rule.
+     * バリデーションルールを実行する。
      *
-     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
+     * @param  string  $attribute  フィールド名
+     * @param  mixed  $value  入力値（メールアドレス）
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail  エラーコールバック
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

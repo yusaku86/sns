@@ -14,6 +14,9 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * 投稿の作成・表示・削除を担うコントローラー。
+ */
 class PostController extends Controller
 {
     public function __construct(
@@ -23,6 +26,13 @@ class PostController extends Controller
         private PostImageStorageInterface $imageStorage,
     ) {}
 
+    /**
+     * 投稿詳細ページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @param  string  $post  投稿ID
+     * @return Response Inertiaレスポンス
+     */
     public function show(Request $request, string $post): Response
     {
         ['post' => $postEntity, 'replies' => $replies] = $this->getPost->execute(
@@ -36,6 +46,11 @@ class PostController extends Controller
         ]);
     }
 
+    /**
+     * 新規投稿を作成する。
+     *
+     * @param  StorePostRequest  $request  バリデーション済みリクエスト
+     */
     public function store(StorePostRequest $request): RedirectResponse
     {
         $imagePaths = $this->imageStorage->storeAll($request->file('images', []));
@@ -52,6 +67,12 @@ class PostController extends Controller
         return back();
     }
 
+    /**
+     * 投稿を削除する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @param  string  $post  投稿ID
+     */
     public function destroy(Request $request, string $post): RedirectResponse
     {
         $this->deletePost->execute(

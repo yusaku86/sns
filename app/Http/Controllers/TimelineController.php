@@ -8,12 +8,21 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * タイムライン一覧ページを担うコントローラー。
+ */
 class TimelineController extends Controller
 {
     public function __construct(
         private GetTimelineUseCase $getTimeline,
     ) {}
 
+    /**
+     * タイムラインページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @return Response Inertiaレスポンス
+     */
     public function index(Request $request): Response
     {
         $validated = $request->validate([

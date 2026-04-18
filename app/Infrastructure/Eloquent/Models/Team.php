@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 /**
+ * チームのEloquentモデル。ソフトデリート対応。
+ *
  * @property string $id
  * @property string $name
  * @property string $slug
@@ -77,6 +79,9 @@ class Team extends Model
         });
     }
 
+    /**
+     * チームオーナーのユーザーモデルを返す。
+     */
     public function owner(): ?Model
     {
         return $this->members()
@@ -84,6 +89,11 @@ class Team extends Model
             ->first();
     }
 
+    /**
+     * メンバー一覧へのリレーション（Membershipピボット経由）。
+     *
+     * @return BelongsToMany<User, $this, Membership>
+     */
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'team_members', 'team_id', 'user_id')
@@ -92,11 +102,21 @@ class Team extends Model
             ->withTimestamps();
     }
 
+    /**
+     * メンバーシップ一覧へのリレーション。
+     *
+     * @return HasMany<Membership, $this>
+     */
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
     }
 
+    /**
+     * 招待一覧へのリレーション。
+     *
+     * @return HasMany<TeamInvitation, $this>
+     */
     public function invitations(): HasMany
     {
         return $this->hasMany(TeamInvitation::class);
@@ -109,6 +129,9 @@ class Team extends Model
         ];
     }
 
+    /**
+     * ルートモデルバインディングのキーとしてslugを使用する。
+     */
     public function getRouteKeyName(): string
     {
         return 'slug';

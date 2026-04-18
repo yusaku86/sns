@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 /**
+ * リツイートのEloquentモデル。updated_atを持たない。
+ *
  * @property string $id
  * @property string $user_id
  * @property string $post_id
@@ -47,11 +49,21 @@ class Retweet extends Model
         });
     }
 
+    /**
+     * リツイートしたユーザーへのリレーション。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * リツイートされた投稿へのリレーション。
+     *
+     * @return BelongsTo<Post, $this>
+     */
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);

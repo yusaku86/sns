@@ -8,12 +8,22 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * ハッシュタグ詳細ページを担うコントローラー。
+ */
 class HashtagController extends Controller
 {
     public function __construct(
         private GetHashtagPostsUseCase $getHashtagPosts,
     ) {}
 
+    /**
+     * ハッシュタグ詳細ページを表示する。
+     *
+     * @param  Request  $request  HTTPリクエスト
+     * @param  string  $hashtag  ハッシュタグ名（#なし）
+     * @return Response Inertiaレスポンス
+     */
     public function show(Request $request, string $hashtag): Response
     {
         $validated = $request->validate([

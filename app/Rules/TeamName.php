@@ -8,12 +8,17 @@ use Illuminate\Routing\Route as RouteElement;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
+/**
+ * チーム名として使用できない予約済み名称を検証するルール。
+ */
 class TeamName implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * バリデーションルールを実行する。
      *
-     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
+     * @param  string  $attribute  フィールド名
+     * @param  mixed  $value  入力値
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail  エラーコールバック
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -25,7 +30,9 @@ class TeamName implements ValidationRule
     }
 
     /**
-     * Get a list of all reserved names.
+     * 予約済み名称の一覧を返す。
+     *
+     * @return string[]
      */
     protected function reservedNames(): array
     {
@@ -367,7 +374,9 @@ class TeamName implements ValidationRule
     }
 
     /**
-     * Get a list of reserved names from the application's route prefixes.
+     * アプリケーションのルートプレフィックス一覧を返す。
+     *
+     * @return string[]
      */
     protected function routesPrefixes(): array
     {

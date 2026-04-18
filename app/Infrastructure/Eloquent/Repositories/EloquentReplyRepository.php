@@ -7,8 +7,14 @@ use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\Reply as ReplyModel;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Eloquentを使ったリプライリポジトリの実装。
+ */
 class EloquentReplyRepository implements ReplyRepositoryInterface
 {
+    /**
+     * {@inheritdoc}
+     */
     public function getByPostId(string $postId): array
     {
         return ReplyModel::with('user')
@@ -19,6 +25,9 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
             ->all();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getByUserId(string $userId, int $limit = 20): array
     {
         return ReplyModel::with(['user', 'post.user'])
@@ -30,6 +39,9 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
             ->all();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function save(ReplyEntity $reply): void
     {
         ReplyModel::create([
@@ -40,6 +52,11 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
         ]);
     }
 
+    /**
+     * ReplyモデルからReplyエンティティを生成する（元投稿情報なし）。
+     *
+     * @param  ReplyModel  $model  リプライモデル
+     */
     private function toEntity(ReplyModel $model): ReplyEntity
     {
         return new ReplyEntity(
@@ -56,6 +73,11 @@ class EloquentReplyRepository implements ReplyRepositoryInterface
         );
     }
 
+    /**
+     * ReplyモデルからReplyエンティティを生成する（元投稿情報付き）。
+     *
+     * @param  ReplyModel  $model  リプライモデル
+     */
     private function toEntityWithPost(ReplyModel $model): ReplyEntity
     {
         return new ReplyEntity(
