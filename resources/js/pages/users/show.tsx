@@ -6,6 +6,7 @@ import FollowButton from '@/components/follow-button';
 import FollowUserListModal from '@/components/follow-user-list-modal';
 import type { FollowUser } from '@/components/follow-user-list-modal';
 import PostCard from '@/components/post-card';
+import type { PostImageData } from '@/components/post-images';
 import RightSidebar from '@/components/right-sidebar';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 
@@ -39,6 +40,8 @@ type Post = {
     retweetedByUserName?: string | null;
     retweetedByUserHandle?: string | null;
     hashtags?: string[];
+    userProfileImageUrl?: string | null;
+    images?: PostImageData[];
 };
 
 type Reply = {
