@@ -41,17 +41,29 @@ export default function PostCard({ post }: { post: Post }) {
 
     function handleLike() {
         if (post.likedByAuthUser) {
-            sendDelete(unlikePost.url(post.id));
+            sendDelete(unlikePost.url(post.id), {
+                preserveScroll: true,
+                preserveState: false,
+            });
         } else {
-            sendPost(likePost.url(post.id));
+            sendPost(likePost.url(post.id), {
+                preserveScroll: true,
+                preserveState: false,
+            });
         }
     }
 
     function handleRetweet() {
         if (post.retweetedByAuthUser) {
-            sendDelete(unretweetPost.url(post.id));
+            sendDelete(unretweetPost.url(post.id), {
+                preserveScroll: true,
+                preserveState: false,
+            });
         } else {
-            sendPost(retweetPost.url(post.id));
+            sendPost(retweetPost.url(post.id), {
+                preserveScroll: true,
+                preserveState: false,
+            });
         }
     }
 
