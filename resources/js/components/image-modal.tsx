@@ -34,7 +34,10 @@ export default function ImageModal({ images, initialIndex, onClose }: Props) {
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
-            onClick={onClose}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+            }}
         >
             {/* 閉じるボタン */}
             <button
