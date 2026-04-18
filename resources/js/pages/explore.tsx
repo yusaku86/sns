@@ -25,16 +25,23 @@ export default function Explore({
     posts,
     nextCursor,
     hasMore,
+    query,
 }: {
     posts: Post[];
     nextCursor: string | null;
     hasMore: boolean;
+    query: string;
 }) {
     const { version, component } = usePage();
     const [allPosts, setAllPosts] = useState<Post[]>(posts);
     const [hasMoreState, setHasMoreState] = useState(hasMore);
     const cursorRef = useRef<string | null>(nextCursor);
     const loadingRef = useRef(false);
+
+    const heading = query ? `「${query}」の検索結果` : 'みんなの投稿';
+    const emptyMessage = query
+        ? '該当する投稿が見つかりませんでした。'
+        : 'まだ投稿がありません。';
 
     const loadMore = useCallback(async () => {
         if (!cursorRef.current || loadingRef.current) {
@@ -49,6 +56,10 @@ export default function Explore({
                 window.location.origin,
             );
             url.searchParams.set('cursor', cursorRef.current);
+
+            if (query) {
+                url.searchParams.set('q', query);
+            }
 
             const response = await fetch(url.toString(), {
                 credentials: 'same-origin',
@@ -76,22 +87,22 @@ export default function Explore({
         } finally {
             loadingRef.current = false;
         }
-    }, [version, component]);
+    }, [version, component, query]);
 
     const sentinelRef = useInfiniteScroll(loadMore, hasMoreState);
 
     return (
         <>
-            <Head title="みんなの投稿" />
-            <div className="mx-auto flex max-w-5xl gap-8 px-4">
+            <Head title={heading} />
+            <div className="mx-auto flex w-full max-w-5xl gap-8 overflow-x-hidden px-4">
                 {/* メインコンテンツ */}
                 <div className="min-w-0 flex-1">
                     <h1 className="border-b border-[#E5E7EB] py-4 text-xl font-semibold text-[#191816]">
-                        みんなの投稿
+                        {heading}
                     </h1>
                     {allPosts.length === 0 ? (
                         <p className="p-8 text-center text-sm text-muted-foreground">
-                            まだ投稿がありません。
+                            {emptyMessage}
                         </p>
                     ) : (
                         allPosts.map((post) => (

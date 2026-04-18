@@ -195,6 +195,33 @@ class EloquentPostRepository implements PostRepositoryInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function searchByKeyword(string $keyword, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array
+    {
+        // 検索は投稿本文のみ対象。リツイートは除外する。
+        $escaped = addcslashes($keyword, '%_\\');
+
+        $query = PostModel::with(['user', 'hashtags', 'images'])
+            ->withCount(['likes', 'replies', 'retweets'])
+            ->where('content', 'like', '%'.$escaped.'%')
+            ->latest();
+
+        if ($cursor !== null) {
+            try {
+                $cursorTime = new \DateTimeImmutable($cursor);
+                $query->where('created_at', '<', $cursorTime->format('Y-m-d H:i:s'));
+            } catch (\Exception) {
+                // 無効なカーソルは無視してカーソルなしと同等に扱う
+            }
+        }
+
+        return $query->limit($limit)->get()
+            ->map(fn (PostModel $model) => $this->toEntity($model, $authUserId))
+            ->all();
+    }
+
+    /**
      * RetweetモデルからPostエンティティを生成する。
      *
      * @param  RetweetModel  $retweet  リツイートモデル

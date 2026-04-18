@@ -73,4 +73,15 @@ interface PostRepositoryInterface
      * @return Post[]
      */
     public function getByUserId(string $userId, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array;
+
+    /**
+     * キーワードで投稿本文を部分一致検索する（リツイートは除外）。
+     *
+     * @param  string  $keyword  検索キーワード
+     * @param  string|null  $authUserId  認証ユーザーID
+     * @param  int  $limit  取得件数
+     * @param  string|null  $cursor  ページネーションカーソル
+     * @return Post[]
+     */
+    public function searchByKeyword(string $keyword, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array;
 }

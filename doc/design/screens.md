@@ -40,7 +40,7 @@
 
 | メソッド | パス | コントローラー | ルート名 |
 |----------|------|--------------|---------|
-| GET | `/explore` | `ExploreController@index` | `explore` |
+| GET | `/explore` | `ExploreController@index` | `explore` | クエリパラメータ `?q=` で投稿検索（省略時は全体一覧）|
 | GET | `/users/{user}` | `UserController@show` | `users.show` |
 | GET | `/posts/{post}` | `PostController@show` | `posts.show` |
 | GET | `/hashtags/{hashtag}` | `HashtagController@show` | `hashtags.show` |
