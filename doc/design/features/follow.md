@@ -57,12 +57,30 @@ interface FollowRepositoryInterface
 
     /** @return FollowUser[] */
     public function getFollowing(string $userId, ?string $authUserId = null): array;
+
+    /**
+     * フォロー中のユーザーがフォローしているユーザーのうち、
+     * 自分未フォロー・自分自身を除いてフォロワー数の多い順に返す。
+     *
+     * @return FollowUser[]
+     */
+    public function getSuggestedUsers(string $authUserId, int $limit): array;
 }
 ```
 
 ---
 
 ## ユースケース
+
+### GetSuggestedUsersUseCase（`app/Application/Follow/GetSuggestedUsersUseCase.php`）
+
+```php
+public function execute(string $authUserId, int $limit = 5): FollowUser[]
+```
+
+- 自分がフォローしているユーザーがフォローしているユーザーを取得
+- 自分自身 / 既にフォロー済みのユーザーを除外
+- フォロワー数の多い順に並べ、`$limit` 件返す
 
 ### FollowUserUseCase（`app/Application/Follow/FollowUserUseCase.php`）
 

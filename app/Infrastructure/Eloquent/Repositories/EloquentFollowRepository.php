@@ -5,6 +5,7 @@ namespace App\Infrastructure\Eloquent\Repositories;
 use App\Domain\Follow\Entities\FollowUser;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Infrastructure\Eloquent\Models\Follow as FollowModel;
+use App\Infrastructure\Eloquent\Models\User as UserModel;
 
 /**
  * Eloquentを使ったフォローリポジトリの実装。
@@ -106,5 +107,45 @@ class EloquentFollowRepository implements FollowRepositoryInterface
                 isFollowedByAuthUser: isset($followedByAuth[$user->id]),
             );
         })->all();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSuggestedUsers(string $authUserId, int $limit): array
+    {
+        $myFollowingIds = FollowModel::where('follower_id', $authUserId)
+            ->pluck('following_id')
+            ->all();
+
+        if (empty($myFollowingIds)) {
+            return [];
+        }
+
+        $candidateIds = FollowModel::whereIn('follower_id', $myFollowingIds)
+            ->where('following_id', '!=', $authUserId)
+            ->whereNotIn('following_id', $myFollowingIds)
+            ->pluck('following_id')
+            ->unique()
+            ->all();
+
+        if (empty($candidateIds)) {
+            return [];
+        }
+
+        $users = UserModel::whereIn('id', $candidateIds)
+            ->withCount('followers')
+            ->orderByDesc('followers_count')
+            ->limit($limit)
+            ->get();
+
+        // whereNotIn($myFollowingIds) で既フォロー済みを除外しているため常に false
+        return $users->map(fn ($user) => new FollowUser(
+            id: $user->id,
+            name: $user->name,
+            handle: $user->handle,
+            profileImageUrl: $user->profile_image_url,
+            isFollowedByAuthUser: false,
+        ))->all();
     }
 }

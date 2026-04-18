@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Application\Follow\GetSuggestedUsersUseCase;
 use App\Application\Hashtag\GetTrendingHashtagsUseCase;
 use App\Infrastructure\Eloquent\Models\User;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class HandleInertiaRequests extends Middleware
 
     public function __construct(
         private GetTrendingHashtagsUseCase $getTrendingHashtags,
+        private GetSuggestedUsersUseCase $getSuggestedUsers,
     ) {}
 
     /**
@@ -57,6 +59,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'trendingHashtags' => fn () => $this->getTrendingHashtags->execute(),
+            'suggestedUsers' => fn () => $user ? $this->getSuggestedUsers->execute($user->id) : [],
         ];
     }
 

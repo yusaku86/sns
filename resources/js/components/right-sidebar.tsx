@@ -1,9 +1,10 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
 import { explore } from '@/routes';
-import { show } from '@/routes/hashtags';
+import { store as followUser } from '@/routes/follows';
+import { show as showHashtag } from '@/routes/hashtags';
+import { show as showUser } from '@/routes/users';
 
 type TrendingHashtag = {
     id: string;
@@ -11,18 +12,22 @@ type TrendingHashtag = {
     postsCount: number;
 };
 
-const suggestedUsers = [
-    { name: '田中 健太', handle: 'kenta_t' },
-    { name: '山本 あかり', handle: 'akari_y' },
-    { name: '高橋 大輔', handle: 'daisuke_t' },
-];
+type SuggestedUser = {
+    id: string;
+    name: string;
+    handle: string;
+    profileImageUrl: string | null;
+    isFollowedByAuthUser: boolean;
+};
 
 export default function RightSidebar() {
     const page = usePage<{
         trendingHashtags: TrendingHashtag[];
+        suggestedUsers: SuggestedUser[];
         query?: string;
+        auth: { user: { id: string } | null };
     }>();
-    const { trendingHashtags } = page.props;
+    const { trendingHashtags, suggestedUsers, auth } = page.props;
     const currentQuery = page.props.query ?? '';
 
     const [searchInput, setSearchInput] = useState(currentQuery);
@@ -31,7 +36,7 @@ export default function RightSidebar() {
         setSearchInput(currentQuery);
     }, [currentQuery]);
 
-    const handleSearch = (e: FormEvent) => {
+    const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const q = searchInput.trim();
@@ -41,6 +46,10 @@ export default function RightSidebar() {
         } else {
             router.visit(explore.url({ query: { q } }));
         }
+    };
+
+    const handleFollow = (userId: string) => {
+        router.post(followUser.url(userId));
     };
 
     return (
@@ -60,37 +69,53 @@ export default function RightSidebar() {
                 />
             </form>
 
-            {/* フォロワーも知っている */}
-            <div>
-                <h2 className="mb-3 text-lg font-bold text-[#191816]">
-                    フォロワーも知っている
-                </h2>
-                <div className="space-y-4 rounded-md bg-[#eae4dc] p-4">
-                    {suggestedUsers.map((user) => (
-                        <div
-                            key={user.handle}
-                            className="flex items-center justify-between gap-2"
-                        >
-                            <div className="flex min-w-0 items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white">
-                                    {user.name.charAt(0)}
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-[#191816]">
-                                        {user.name}
-                                    </p>
-                                    <p className="font-mono text-xs text-[#8a8784]">
-                                        @{user.handle}
-                                    </p>
-                                </div>
+            {/* おすすめユーザー */}
+            {auth.user && suggestedUsers.length > 0 && (
+                <div>
+                    <h2 className="mb-3 text-lg font-bold text-[#191816]">
+                        フォロワーも知っている
+                    </h2>
+                    <div className="space-y-4 rounded-md bg-[#eae4dc] p-4">
+                        {suggestedUsers.map((user) => (
+                            <div
+                                key={user.id}
+                                className="flex items-center justify-between gap-2"
+                            >
+                                <Link
+                                    href={showUser.url(user.id)}
+                                    className="flex min-w-0 items-center gap-3 hover:opacity-75"
+                                >
+                                    {user.profileImageUrl ? (
+                                        <img
+                                            src={user.profileImageUrl}
+                                            alt={user.name}
+                                            className="h-10 w-10 shrink-0 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#3a6c72] text-sm font-semibold text-white">
+                                            {user.name.charAt(0)}
+                                        </div>
+                                    )}
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-[#191816]">
+                                            {user.name}
+                                        </p>
+                                        <p className="font-mono text-xs text-[#8a8784]">
+                                            @{user.handle}
+                                        </p>
+                                    </div>
+                                </Link>
+                                <button
+                                    onClick={() => handleFollow(user.id)}
+                                    className="shrink-0 rounded-md border border-[#3a6c72] px-3 py-1 text-sm font-semibold text-[#3a6c72] transition-colors hover:bg-[#3a6c72] hover:text-white"
+                                >
+                                    フォロー
+                                </button>
                             </div>
-                            <button className="shrink-0 rounded-md border border-[#3a6c72] px-3 py-1 text-sm font-semibold text-[#3a6c72] transition-colors hover:bg-[#3a6c72] hover:text-white">
-                                フォロー
-                            </button>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* トレンド */}
             <div>
@@ -106,7 +131,7 @@ export default function RightSidebar() {
                         trendingHashtags.map((trend) => (
                             <Link
                                 key={trend.name}
-                                href={show.url(trend.name)}
+                                href={showHashtag.url(trend.name)}
                                 className="block hover:opacity-75"
                             >
                                 <p className="text-sm font-semibold text-[#191816]">
