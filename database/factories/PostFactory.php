@@ -15,7 +15,7 @@ class PostFactory extends Factory
 
     public function definition(): array
     {
-        $createdAt = fake()->dateTimeBetween('-30 days', 'now');
+        $createdAt = fake()->dateTimeBetween('-10 years', 'now');
 
         return [
             'user_id' => User::factory(),

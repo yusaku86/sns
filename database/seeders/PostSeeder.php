@@ -12,9 +12,9 @@ class PostSeeder extends Seeder
     {
         $users = User::all();
 
-        // 各ユーザーが3〜7件の投稿を作成
+        // 各ユーザーが3〜20件の投稿を作成
         $users->each(function (User $user) {
-            Post::factory(rand(3, 7))->create([
+            Post::factory(rand(3, 20))->create([
                 'user_id' => $user->id,
             ]);
         });

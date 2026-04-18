@@ -13,10 +13,10 @@ class FollowSeeder extends Seeder
         $users = User::all();
 
         $users->each(function (User $follower) use ($users) {
-            // 自分以外のユーザーからランダムに2〜5人をフォロー
+            // 自分以外のユーザーからランダムに1 ~ 40人をフォロー
             $targets = $users
                 ->where('id', '!=', $follower->id)
-                ->random(min(rand(2, 5), $users->count() - 1));
+                ->random(min(rand(1, 40), $users->count() - 1));
 
             $targets->each(function (User $following) use ($follower) {
                 // 重複を避けて作成

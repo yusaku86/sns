@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'bio' => 'テスト用のアカウントです。',
         ]);
 
-        // ランダムユーザーを9人追加（合計10人）
-        User::factory(9)->create();
+        // ランダムユーザーを99人追加（合計100人）
+        User::factory(49)->create();
     }
 }

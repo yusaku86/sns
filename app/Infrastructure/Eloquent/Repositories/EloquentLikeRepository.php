@@ -4,8 +4,10 @@ namespace App\Infrastructure\Eloquent\Repositories;
 
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
 use App\Domain\Post\Entities\Post as PostEntity;
+use App\Domain\Post\Entities\PostImage as PostImageEntity;
 use App\Infrastructure\Eloquent\Models\Like as LikeModel;
 use App\Infrastructure\Eloquent\Models\Post as PostModel;
+use App\Infrastructure\Eloquent\Models\PostImage as PostImageModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -60,7 +62,7 @@ class EloquentLikeRepository implements LikeRepositoryInterface
         }
 
         /** @var Collection<int, PostModel> $posts */
-        $posts = PostModel::with(['user', 'hashtags'])
+        $posts = PostModel::with(['user', 'hashtags', 'images'])
             ->withCount(['likes', 'replies', 'retweets'])
             ->whereIn('id', $postIds)
             ->get()
@@ -104,6 +106,25 @@ class EloquentLikeRepository implements LikeRepositoryInterface
             userProfileImageUrl: $model->user->profile_image
                 ? Storage::disk('public')->url($model->user->profile_image)
                 : null,
+            images: $this->toImageEntities($model),
         );
+    }
+
+    /**
+     * PostモデルのimagesリレーションからPostImageエンティティ配列を生成する。
+     *
+     * @param  PostModel  $model  投稿モデル
+     * @return PostImageEntity[]
+     */
+    private function toImageEntities(PostModel $model): array
+    {
+        return $model->images
+            ->map(fn (PostImageModel $img) => new PostImageEntity(
+                id: $img->id,
+                postId: $img->post_id,
+                path: $img->path,
+                order: $img->order,
+            ))
+            ->all();
     }
 }
