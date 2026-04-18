@@ -12,6 +12,7 @@ class FollowUserUseCase
 {
     public function __construct(
         private FollowRepositoryInterface $followRepository,
+        private GetSuggestedUsersUseCase $suggestedUsers,
     ) {}
 
     /**
@@ -28,10 +29,12 @@ class FollowUserUseCase
             throw new InvalidArgumentException('自分自身をフォローすることはできません。');
         }
 
+        // 既にフォロー済みの場合は状態変更なし・キャッシュも維持
         if ($this->followRepository->exists($followerId, $followingId)) {
             return;
         }
 
         $this->followRepository->save($followerId, $followingId);
+        $this->suggestedUsers->invalidate($followerId);
     }
 }

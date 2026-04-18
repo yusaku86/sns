@@ -124,7 +124,6 @@ class EloquentFollowRepository implements FollowRepositoryInterface
 
         $candidateIds = FollowModel::whereIn('follower_id', $myFollowingIds)
             ->where('following_id', '!=', $authUserId)
-            ->whereNotIn('following_id', $myFollowingIds)
             ->pluck('following_id')
             ->unique()
             ->all();
@@ -139,13 +138,14 @@ class EloquentFollowRepository implements FollowRepositoryInterface
             ->limit($limit)
             ->get();
 
-        // whereNotIn($myFollowingIds) で既フォロー済みを除外しているため常に false
+        $followedByAuth = collect($myFollowingIds)->flip()->all();
+
         return $users->map(fn ($user) => new FollowUser(
             id: $user->id,
             name: $user->name,
             handle: $user->handle,
             profileImageUrl: $user->profile_image_url,
-            isFollowedByAuthUser: false,
+            isFollowedByAuthUser: isset($followedByAuth[$user->id]),
         ))->all();
     }
 }

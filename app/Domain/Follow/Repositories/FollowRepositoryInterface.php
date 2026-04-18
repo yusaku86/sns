@@ -53,8 +53,8 @@ interface FollowRepositoryInterface
     public function getFollowing(string $userId, ?string $authUserId = null): array;
 
     /**
-     * フォロー中のユーザーがフォローしているユーザーのうち、
-     * 自分未フォロー・自分自身を除いてフォロワー数の多い順に返す。
+     * フォロー中のユーザーがフォローしているユーザーを、フォロワー数の多い順に返す。
+     * 自分自身は除外する。フォロー済みユーザーも含み isFollowedByAuthUser で状態を示す。
      *
      * @param  string  $authUserId  認証ユーザーID
      * @param  int  $limit  取得件数

@@ -2,7 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { explore } from '@/routes';
-import { store as followUser } from '@/routes/follows';
+import { store as followUser, destroy as unfollowUser } from '@/routes/follows';
 import { show as showHashtag } from '@/routes/hashtags';
 import { show as showUser } from '@/routes/users';
 
@@ -27,14 +27,21 @@ export default function RightSidebar() {
         query?: string;
         auth: { user: { id: string } | null };
     }>();
-    const { trendingHashtags, suggestedUsers, auth } = page.props;
+    const { trendingHashtags, auth } = page.props;
     const currentQuery = page.props.query ?? '';
 
     const [searchInput, setSearchInput] = useState(currentQuery);
+    const [localUsers, setLocalUsers] = useState<SuggestedUser[]>(
+        page.props.suggestedUsers,
+    );
 
     useEffect(() => {
         setSearchInput(currentQuery);
     }, [currentQuery]);
+
+    useEffect(() => {
+        setLocalUsers(page.props.suggestedUsers);
+    }, [page.props.suggestedUsers]);
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -48,8 +55,36 @@ export default function RightSidebar() {
         }
     };
 
-    const handleFollow = (userId: string) => {
-        router.post(followUser.url(userId));
+    const handleFollowToggle = (userId: string, isFollowing: boolean) => {
+        setLocalUsers((prev) =>
+            prev.map((u) =>
+                u.id === userId
+                    ? { ...u, isFollowedByAuthUser: !isFollowing }
+                    : u,
+            ),
+        );
+
+        const rollback = () =>
+            setLocalUsers((prev) =>
+                prev.map((u) =>
+                    u.id === userId
+                        ? { ...u, isFollowedByAuthUser: isFollowing }
+                        : u,
+                ),
+            );
+
+        if (isFollowing) {
+            router.delete(unfollowUser.url(userId), {
+                only: [],
+                onError: rollback,
+            });
+        } else {
+            router.post(
+                followUser.url(userId),
+                {},
+                { only: [], onError: rollback },
+            );
+        }
     };
 
     return (
@@ -70,13 +105,13 @@ export default function RightSidebar() {
             </form>
 
             {/* おすすめユーザー */}
-            {auth.user && suggestedUsers.length > 0 && (
+            {auth.user && localUsers.length > 0 && (
                 <div>
                     <h2 className="mb-3 text-lg font-bold text-[#191816]">
                         フォロワーも知っている
                     </h2>
                     <div className="space-y-4 rounded-md bg-[#eae4dc] p-4">
-                        {suggestedUsers.map((user) => (
+                        {localUsers.map((user) => (
                             <div
                                 key={user.id}
                                 className="flex items-center justify-between gap-2"
@@ -106,10 +141,21 @@ export default function RightSidebar() {
                                     </div>
                                 </Link>
                                 <button
-                                    onClick={() => handleFollow(user.id)}
-                                    className="shrink-0 rounded-md border border-[#3a6c72] px-3 py-1 text-sm font-semibold text-[#3a6c72] transition-colors hover:bg-[#3a6c72] hover:text-white"
+                                    onClick={() =>
+                                        handleFollowToggle(
+                                            user.id,
+                                            user.isFollowedByAuthUser,
+                                        )
+                                    }
+                                    className={`shrink-0 rounded-md border px-3 py-1 text-sm font-semibold transition-colors ${
+                                        user.isFollowedByAuthUser
+                                            ? 'border-[#E5E7EB] bg-transparent text-[#111827] hover:border-[#b36b09] hover:text-[#b36b09]'
+                                            : 'border-[#3a6c72] text-[#3a6c72] hover:bg-[#3a6c72] hover:text-white'
+                                    }`}
                                 >
-                                    フォロー
+                                    {user.isFollowedByAuthUser
+                                        ? 'フォロー中'
+                                        : 'フォロー'}
                                 </button>
                             </div>
                         ))}
