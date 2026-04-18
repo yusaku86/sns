@@ -75,7 +75,7 @@ import { timeline } from '@/routes';
 |---|---|
 | `welcome` | なし |
 | `auth/*` | AuthLayout |
-| `settings/*`, `teams/*` | AppLayout + SettingsLayout |
+| `settings/*` | AppLayout + SettingsLayout |
 | その他 | AppLayout |
 
 ### ドメインエンティティのJSON変換

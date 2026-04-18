@@ -7,7 +7,6 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\RetweetController;
-use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\TimelineController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +40,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/users/{user}/follow', [FollowController::class, 'destroy'])->name('follows.destroy');
     });
 
-    Route::get('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');
 });
 
 require __DIR__.'/settings.php';

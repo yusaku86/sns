@@ -21,9 +21,9 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  * @property-read Collection<int, Hashtag> $hashtags
+ * @property-read int|null $hashtags_count
  * @property-read Collection<int, PostImage> $images
  * @property-read int|null $images_count
- * @property-read int|null $hashtags_count
  * @property-read Collection<int, Like> $likes
  * @property-read int|null $likes_count
  * @property-read Collection<int, Reply> $replies
