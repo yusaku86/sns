@@ -57,11 +57,10 @@ export default function TwoFactorRecoveryCodes({
             <CardHeader>
                 <CardTitle className="flex gap-3">
                     <LockKeyhole className="size-4" aria-hidden="true" />
-                    2FA recovery codes
+                    二段階認証 リカバリーコード
                 </CardTitle>
                 <CardDescription>
-                    Recovery codes let you regain access if you lose your 2FA
-                    device. Store them in a secure password manager.
+                    リカバリーコードを使うと、二段階認証デバイスを紛失した場合でもアカウントにアクセスできます。安全なパスワードマネージャーに保管してください。
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -76,7 +75,7 @@ export default function TwoFactorRecoveryCodes({
                             className="size-4"
                             aria-hidden="true"
                         />
-                        {codesAreVisible ? 'Hide' : 'View'} recovery codes
+                        リカバリーコードを{codesAreVisible ? '隠す' : '表示'}
                     </Button>
 
                     {canRegenerateCodes && (
@@ -92,7 +91,7 @@ export default function TwoFactorRecoveryCodes({
                                     disabled={processing}
                                     aria-describedby="regenerate-warning"
                                 >
-                                    <RefreshCw /> Regenerate codes
+                                    <RefreshCw /> コードを再生成
                                 </Button>
                             )}
                         </Form>
@@ -145,13 +144,11 @@ export default function TwoFactorRecoveryCodes({
 
                                 <div className="text-xs text-muted-foreground select-none">
                                     <p id="regenerate-warning">
-                                        Each recovery code can be used once to
-                                        access your account and will be removed
-                                        after use. If you need more, click{' '}
+                                        各リカバリーコードは一度だけ使用でき、使用後は無効になります。新しいコードが必要な場合は上の
                                         <span className="font-bold">
-                                            Regenerate codes
-                                        </span>{' '}
-                                        above.
+                                            コードを再生成
+                                        </span>
+                                        をクリックしてください。
                                     </p>
                                 </div>
                             </>
