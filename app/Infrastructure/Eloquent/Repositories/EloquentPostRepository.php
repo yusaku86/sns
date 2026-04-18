@@ -40,16 +40,18 @@ class EloquentPostRepository implements PostRepositoryInterface
         $followingIds = Follow::where('follower_id', $userId)
             ->pluck('following_id');
 
+        $targetIds = $followingIds->concat([$userId])->unique()->values();
+
         $postQuery = PostModel::with(['user', 'hashtags', 'images'])
             ->withCount(['likes', 'replies', 'retweets'])
-            ->whereIn('user_id', $followingIds)
+            ->whereIn('user_id', $targetIds)
             ->latest();
 
         $retweetQuery = RetweetModel::with([
             'user',
             'post' => fn ($q) => $q->with(['user', 'hashtags', 'images'])->withCount(['likes', 'replies', 'retweets']),
         ])
-            ->whereIn('user_id', $followingIds)
+            ->whereIn('user_id', $targetIds)
             ->latest();
 
         if ($cursor !== null) {

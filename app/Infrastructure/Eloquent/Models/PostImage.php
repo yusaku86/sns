@@ -19,6 +19,16 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable|null $updated_at
  * @property-read Post $post
  *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage whereOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage wherePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage wherePostId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|PostImage whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 #[Fillable(['id', 'post_id', 'path', 'order'])]

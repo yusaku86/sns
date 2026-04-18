@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 /**
- * Inertiaの共有データ（認証ユーザー・チーム・トレンドハッシュタグ）を設定するミドルウェア。
+ * Inertiaの共有データ（認証ユーザー・トレンドハッシュタグ）を設定するミドルウェア。
  */
 class HandleInertiaRequests extends Middleware
 {
@@ -56,8 +56,6 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? $this->serializeUser($user) : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'currentTeam' => fn () => $user?->currentTeam ? $user->toUserTeam($user->currentTeam) : null,
-            'teams' => fn () => $user?->toUserTeams(includeCurrent: true) ?? [],
             'trendingHashtags' => fn () => $this->getTrendingHashtags->execute(),
         ];
     }

@@ -2,7 +2,6 @@
 
 namespace App\Infrastructure\Eloquent\Models;
 
-use App\Concerns\HasTeams;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -19,7 +18,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 /**
- * ユーザーのEloquentモデル。認証・2FA・チーム機能を含む。
+ * ユーザーのEloquentモデル。認証・2FAを含む。
  *
  * @property string $id
  * @property string $name
@@ -30,14 +29,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $email
  * @property CarbonImmutable|null $email_verified_at
  * @property string $password
- * @property string|null $current_team_id
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property CarbonImmutable|null $two_factor_confirmed_at
  * @property string|null $remember_token
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
- * @property-read Team|null $currentTeam
  * @property-read Collection<int, Follow> $followers
  * @property-read int|null $followers_count
  * @property-read Collection<int, Follow> $followings
@@ -46,15 +43,9 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read int|null $likes_count
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read Collection<int, Team> $ownedTeams
- * @property-read int|null $owned_teams_count
  * @property-read Collection<int, Post> $posts
  * @property-read int|null $posts_count
  * @property-read mixed $profile_image_url
- * @property-read Collection<int, Membership> $teamMemberships
- * @property-read int|null $team_memberships_count
- * @property-read Collection<int, Team> $teams
- * @property-read int|null $teams_count
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
@@ -62,7 +53,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereBio($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCurrentTeamId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereHandle($value)
@@ -79,11 +69,11 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  *
  * @mixin \Eloquent
  */
-#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'header_image', 'profile_image', 'current_team_id'])]
+#[Fillable(['name', 'handle', 'email', 'password', 'bio', 'header_image', 'profile_image'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
-    use HasFactory, HasTeams, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     public $incrementing = false;
 

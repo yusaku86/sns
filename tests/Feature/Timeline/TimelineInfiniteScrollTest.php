@@ -2,6 +2,7 @@
 
 use App\Infrastructure\Eloquent\Models\Follow;
 use App\Infrastructure\Eloquent\Models\Post;
+use App\Infrastructure\Eloquent\Models\Retweet;
 use App\Infrastructure\Eloquent\Models\User;
 
 it('タイムラインにnextCursorとhasMoreが含まれる', function () {
@@ -37,6 +38,41 @@ it('投稿が21件あるときhasMore=trueとnextCursorを返す', function () {
             ->where('hasMore', true)
             ->has('posts', 20)
             ->where('nextCursor', fn ($cursor) => $cursor !== null)
+        );
+});
+
+it('自身の投稿がタイムラインに表示される', function () {
+    $user = User::factory()->create();
+
+    Post::factory()->count(2)->create(['user_id' => $user->id]);
+
+    $this->withoutVite()
+        ->actingAs($user)
+        ->get(route('timeline'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('timeline')
+            ->has('posts', 2)
+        );
+});
+
+it('自身のリツイートがタイムラインに表示される', function () {
+    $user = User::factory()->create();
+    $other = User::factory()->create();
+    $post = Post::factory()->create(['user_id' => $other->id]);
+
+    Retweet::create([
+        'user_id' => $user->id,
+        'post_id' => $post->id,
+    ]);
+
+    $this->withoutVite()
+        ->actingAs($user)
+        ->get(route('timeline'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('timeline')
+            ->has('posts', 1)
         );
 });
 
