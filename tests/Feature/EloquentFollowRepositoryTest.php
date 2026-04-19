@@ -114,6 +114,37 @@ it('getFollowing: 認証ユーザーが未フォローの場合 isFollowedByAuth
     expect($result[0]->isFollowedByAuthUser)->toBeFalse();
 });
 
+it('getSuggestedUsers: 自分がフォローしているユーザーのフォロイーをフォロワー数順で返す', function () {
+    $auth = User::factory()->create();
+    $following = User::factory()->create();
+    $suggested = User::factory()->create();
+    $other = User::factory()->create();
+
+    Follow::create(['follower_id' => $auth->id, 'following_id' => $following->id]);
+    Follow::create(['follower_id' => $following->id, 'following_id' => $suggested->id]);
+    Follow::create(['follower_id' => $following->id, 'following_id' => $other->id]);
+
+    $repository = new EloquentFollowRepository;
+    $result = $repository->getSuggestedUsers($auth->id, 5);
+
+    expect(collect($result)->pluck('id')->all())->toContain($suggested->id, $other->id);
+});
+
+it('getSuggestedUsers: 既にフォロー済みのユーザーは除外する', function () {
+    $auth = User::factory()->create();
+    $following = User::factory()->create();
+    $alreadyFollowed = User::factory()->create();
+
+    Follow::create(['follower_id' => $auth->id, 'following_id' => $following->id]);
+    Follow::create(['follower_id' => $auth->id, 'following_id' => $alreadyFollowed->id]);
+    Follow::create(['follower_id' => $following->id, 'following_id' => $alreadyFollowed->id]);
+
+    $repository = new EloquentFollowRepository;
+    $result = $repository->getSuggestedUsers($auth->id, 5);
+
+    expect(collect($result)->pluck('id')->all())->not->toContain($alreadyFollowed->id);
+});
+
 it('getFollowers: 返される FollowUser の各フィールドが正しい', function () {
     $user = User::factory()->create();
     $follower = User::factory()->create(['name' => 'テストユーザー']);

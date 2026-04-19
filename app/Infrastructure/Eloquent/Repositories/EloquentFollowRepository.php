@@ -133,6 +133,7 @@ class EloquentFollowRepository implements FollowRepositoryInterface
         }
 
         $users = UserModel::whereIn('id', $candidateIds)
+            ->whereNotIn('id', $myFollowingIds)
             ->withCount('followers')
             ->orderByDesc('followers_count')
             ->limit($limit)
