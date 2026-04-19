@@ -35,7 +35,9 @@ class GetSuggestedUsersUseCase
 
         if ($cached === null) {
             $users = $this->followRepository->getSuggestedUsers($authUserId, $limit);
-            $this->cache->put($authUserId, $users);
+            if (! empty($users)) {
+                $this->cache->put($authUserId, $users);
+            }
         } else {
             if (! $this->cache->isFresh($authUserId)) {
                 $this->refresher->refresh($authUserId, $limit);
