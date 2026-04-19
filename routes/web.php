@@ -19,8 +19,8 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/hashtags/{hashtag}', [HashtagController::class, 'show'])->name('hashtags.show');
 });
 
-// 認証必要
-Route::middleware('auth')->group(function () {
+// 認証必要（メール確認済み）
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('throttle:120,1')->get('/', [TimelineController::class, 'index'])->name('timeline');
     Route::redirect('/dashboard', '/')->name('dashboard');
 
