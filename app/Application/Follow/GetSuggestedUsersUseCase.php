@@ -4,25 +4,24 @@ namespace App\Application\Follow;
 
 use App\Domain\Follow\Entities\FollowUser;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 /**
- * 認証ユーザーへのおすすめユーザー一覧を取得するユースケース。
- * 結果は30分キャッシュされ、フォロー・アンフォロー時に invalidate() で破棄される。
+ * おすすめユーザー一覧を取得するユースケース。
+ * Stale-while-revalidate 戦略でキャッシュを管理する。
  */
 class GetSuggestedUsersUseCase
 {
-    private const TTL_SECONDS = 1800;
-
-    private const CACHE_KEY_PREFIX = 'suggested_users:';
-
     public function __construct(
         private FollowRepositoryInterface $followRepository,
-        private CacheRepository $cache,
+        private SuggestedUserCacheInterface $cache,
+        private SuggestedUserRefresherInterface $refresher,
     ) {}
 
     /**
-     * おすすめユーザーを取得する。
+     * おすすめユーザーを返す。
+     * キャッシュなし: 同期計算して保存。
+     * フレッシュ: キャッシュをそのまま返す。
+     * ステール: 古いキャッシュを即返しつつバックグラウンドで再計算を依頼する。
      *
      * @param  string  $authUserId  認証ユーザーID
      * @param  int  $limit  取得件数
@@ -30,21 +29,19 @@ class GetSuggestedUsersUseCase
      */
     public function execute(string $authUserId, int $limit = 5): array
     {
-        return $this->cache->remember(
-            self::CACHE_KEY_PREFIX.$authUserId,
-            self::TTL_SECONDS,
-            fn () => $this->followRepository->getSuggestedUsers($authUserId, $limit),
-        );
-    }
+        $cached = $this->cache->get($authUserId);
 
-    /**
-     * 指定ユーザーのおすすめキャッシュを破棄する。
-     * フォロー・アンフォロー後に呼び出す。
-     *
-     * @param  string  $authUserId  キャッシュを破棄するユーザーID
-     */
-    public function invalidate(string $authUserId): void
-    {
-        $this->cache->forget(self::CACHE_KEY_PREFIX.$authUserId);
+        if ($cached === null) {
+            $users = $this->followRepository->getSuggestedUsers($authUserId, $limit);
+            $this->cache->put($authUserId, $users);
+
+            return $users;
+        }
+
+        if (! $this->cache->isFresh($authUserId)) {
+            $this->refresher->refresh($authUserId, $limit);
+        }
+
+        return $cached;
     }
 }

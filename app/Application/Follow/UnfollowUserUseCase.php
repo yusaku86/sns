@@ -11,7 +11,6 @@ class UnfollowUserUseCase
 {
     public function __construct(
         private FollowRepositoryInterface $followRepository,
-        private GetSuggestedUsersUseCase $suggestedUsers,
     ) {}
 
     /**
@@ -23,6 +22,5 @@ class UnfollowUserUseCase
     public function execute(string $followerId, string $followingId): void
     {
         $this->followRepository->delete($followerId, $followingId);
-        $this->suggestedUsers->invalidate($followerId);
     }
 }

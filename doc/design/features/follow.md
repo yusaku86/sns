@@ -78,10 +78,32 @@ interface FollowRepositoryInterface
 public function execute(string $authUserId, int $limit = 5): FollowUser[]
 ```
 
-- 自分がフォローしているユーザーがフォローしているユーザーを取得（自分自身を除外）
-- フォロー済みユーザーもリストに含め、`isFollowedByAuthUser` フラグで状態を伝える
-- フォロワー数の多い順に並べ、`$limit` 件返す
-- 結果を `suggested_users:{authUserId}` キーで30分キャッシュ（フォロー・アンフォロー時に破棄）
+- Stale-while-revalidate 戦略でキャッシュを管理する
+  - キャッシュなし（初回）: 同期計算 → キャッシュ保存 → 返す
+  - キャッシュあり・フレッシュ（1時間以内）: キャッシュをそのまま返す
+  - キャッシュあり・ステール（1時間経過）: 古いキャッシュを即返す + バックグラウンドで `ComputeSuggestedUsersJob` をディスパッチ
+- `SuggestedUserCacheInterface` / `SuggestedUserRefresherInterface` のみに依存（Laravelクラス非依存）
+
+### ComputeSuggestedUsersUseCase（`app/Application/Follow/ComputeSuggestedUsersUseCase.php`）
+
+```php
+public function execute(string $authUserId, int $limit = 5): void
+```
+
+- おすすめユーザーを計算し `SuggestedUserCacheInterface` に保存する
+- `GetSuggestedUsersUseCase` からの同期呼び出し、および `ComputeSuggestedUsersJob` から利用される
+
+### おすすめユーザーキャッシュ戦略
+
+| インターフェース | 配置 | 実装クラス |
+|----------------|------|-----------|
+| `SuggestedUserCacheInterface` | `app/Application/Follow/` | `LaravelSuggestedUserCache`（Infrastructure） |
+| `SuggestedUserRefresherInterface` | `app/Application/Follow/` | `JobSuggestedUserRefresher`（Infrastructure） |
+
+- データTTL: 2時間（ハード失効）
+- フレッシュネスTTL: 1時間（ステール判定のトリガー）
+- フォロー・アンフォロー時はキャッシュを無効化しない（リストは最大2時間固定）
+- フォロー状態（`isFollowedByAuthUser`）はフロントのローカル状態で管理
 
 ### FollowUserUseCase（`app/Application/Follow/FollowUserUseCase.php`）
 

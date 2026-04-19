@@ -1,75 +1,66 @@
 <?php
 
 use App\Application\Follow\GetSuggestedUsersUseCase;
+use App\Application\Follow\SuggestedUserCacheInterface;
+use App\Application\Follow\SuggestedUserRefresherInterface;
 use App\Domain\Follow\Entities\FollowUser;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
-it('キャッシュがなければリポジトリから取得してキャッシュに保存する', function () {
-    $users = [
-        new FollowUser('uuid-2', '田中', 'tanaka', null, false),
-    ];
+it('キャッシュがなければ同期計算してキャッシュに保存する', function () {
+    $users = [new FollowUser('uuid-2', '田中', 'tanaka', null, false)];
 
     $repository = mock(FollowRepositoryInterface::class);
-    $repository->shouldReceive('getSuggestedUsers')
-        ->with('uuid-1', 5)
-        ->once()
-        ->andReturn($users);
+    $repository->shouldReceive('getSuggestedUsers')->with('uuid-1', 5)->once()->andReturn($users);
 
-    $cache = mock(CacheRepository::class);
-    $cache->shouldReceive('remember')
-        ->with('suggested_users:uuid-1', 1800, Mockery::type('Closure'))
-        ->once()
-        ->andReturnUsing(fn ($key, $ttl, $callback) => $callback());
+    $cache = mock(SuggestedUserCacheInterface::class);
+    $cache->shouldReceive('get')->with('uuid-1')->once()->andReturnNull();
+    $cache->shouldReceive('put')->with('uuid-1', $users)->once();
 
-    $useCase = new GetSuggestedUsersUseCase($repository, $cache);
+    $refresher = mock(SuggestedUserRefresherInterface::class);
+    $refresher->shouldNotReceive('refresh');
+
+    $useCase = new GetSuggestedUsersUseCase($repository, $cache, $refresher);
     $result = $useCase->execute('uuid-1');
 
     expect($result)->toBe($users);
 });
 
-it('キャッシュがあればリポジトリを呼ばずキャッシュを返す', function () {
-    $cached = [
-        new FollowUser('uuid-2', '田中', 'tanaka', null, false),
-    ];
+it('キャッシュがありフレッシュならそのまま返す', function () {
+    $cached = [new FollowUser('uuid-2', '田中', 'tanaka', null, false)];
 
     $repository = mock(FollowRepositoryInterface::class);
     $repository->shouldNotReceive('getSuggestedUsers');
 
-    $cache = mock(CacheRepository::class);
-    $cache->shouldReceive('remember')
-        ->once()
-        ->andReturn($cached);
+    $cache = mock(SuggestedUserCacheInterface::class);
+    $cache->shouldReceive('get')->with('uuid-1')->once()->andReturn($cached);
+    $cache->shouldReceive('isFresh')->with('uuid-1')->once()->andReturnTrue();
+    $cache->shouldNotReceive('put');
 
-    $useCase = new GetSuggestedUsersUseCase($repository, $cache);
+    $refresher = mock(SuggestedUserRefresherInterface::class);
+    $refresher->shouldNotReceive('refresh');
+
+    $useCase = new GetSuggestedUsersUseCase($repository, $cache, $refresher);
     $result = $useCase->execute('uuid-1');
 
     expect($result)->toBe($cached);
 });
 
-it('件数を指定してリポジトリに渡す', function () {
+it('キャッシュがありステールなら古いデータを返しつつバックグラウンドで再計算を依頼する', function () {
+    $stale = [new FollowUser('uuid-2', '田中', 'tanaka', null, false)];
+
     $repository = mock(FollowRepositoryInterface::class);
-    $repository->shouldReceive('getSuggestedUsers')
-        ->with('uuid-1', 3)
-        ->once()
-        ->andReturn([]);
+    $repository->shouldNotReceive('getSuggestedUsers');
 
-    $cache = mock(CacheRepository::class);
-    $cache->shouldReceive('remember')
-        ->andReturnUsing(fn ($key, $ttl, $callback) => $callback());
+    $cache = mock(SuggestedUserCacheInterface::class);
+    $cache->shouldReceive('get')->with('uuid-1')->once()->andReturn($stale);
+    $cache->shouldReceive('isFresh')->with('uuid-1')->once()->andReturnFalse();
+    $cache->shouldNotReceive('put');
 
-    $useCase = new GetSuggestedUsersUseCase($repository, $cache);
-    $useCase->execute('uuid-1', 3);
-});
+    $refresher = mock(SuggestedUserRefresherInterface::class);
+    $refresher->shouldReceive('refresh')->with('uuid-1', 5)->once();
 
-it('invalidate でキャッシュを破棄する', function () {
-    $repository = mock(FollowRepositoryInterface::class);
+    $useCase = new GetSuggestedUsersUseCase($repository, $cache, $refresher);
+    $result = $useCase->execute('uuid-1');
 
-    $cache = mock(CacheRepository::class);
-    $cache->shouldReceive('forget')
-        ->with('suggested_users:uuid-1')
-        ->once();
-
-    $useCase = new GetSuggestedUsersUseCase($repository, $cache);
-    $useCase->invalidate('uuid-1');
+    expect($result)->toBe($stale);
 });
