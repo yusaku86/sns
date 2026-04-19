@@ -61,6 +61,15 @@ services:
         depends_on:
             - mysql
 
+    mail:
+        image: 'axllent/mailpit:v1.29'
+        ports:
+            - '8025:8025'
+        volumes:
+            - './docker/mail/data:/data'
+        networks:
+            - sail
+
 networks:
     sail:
         driver: bridge
