@@ -77,7 +77,7 @@ export default function PostCard({ post }: { post: Post }) {
 
     return (
         <div
-            className="cursor-pointer border-b border-[#E5E7EB] p-4 transition-colors hover:bg-[#eae4dc]"
+            className="w-full cursor-pointer border-b border-[#E5E7EB] p-4 transition-colors hover:bg-[#eae4dc]"
             onClick={() => router.visit(showPost.url(post.id))}
         >
             {post.retweetedByUserName && (

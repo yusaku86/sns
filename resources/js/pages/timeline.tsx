@@ -84,7 +84,7 @@ export default function Timeline({
     return (
         <>
             <Head title="タイムライン" />
-            <div className="mx-auto flex max-w-5xl gap-8 px-4">
+            <div className="mx-auto flex w-full max-w-5xl gap-8 px-4">
                 {/* メインコンテンツ */}
                 <div className="min-w-0 flex-1">
                     <PostForm />
