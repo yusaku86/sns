@@ -35,7 +35,7 @@ class LaravelSuggestedUserCache implements SuggestedUserCacheInterface
     {
         $raw = $this->cache->get(self::KEY_PREFIX.$userId);
 
-        if ($raw === null) {
+        if (! is_array($raw) || (count($raw) > 0 && ! is_array($raw[0]))) {
             return null;
         }
 
