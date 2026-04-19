@@ -6,6 +6,17 @@ Laravel Fortify を使ったパスワード認証と二要素認証（TOTP）。
 
 ---
 
+## メールアドレス確認（Email Verification）
+
+登録後にメールアドレス確認メールを送信し、未確認ユーザーは認証必須ルートにアクセスできないようにする。
+
+- `User` モデルが `Illuminate\Contracts\Auth\MustVerifyEmail` を implement
+- `config/fortify.php` の `Features::emailVerification()` で確認メール送信を有効化
+- 認証必須ルートに `verified` ミドルウェアを追加（`routes/web.php`、`routes/settings.php`）
+- メール未確認ユーザーは `/email/verify` にリダイレクト
+
+---
+
 ## 使用ライブラリ
 
 | ライブラリ | 用途 |
