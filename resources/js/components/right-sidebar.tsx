@@ -31,17 +31,10 @@ export default function RightSidebar() {
     const currentQuery = page.props.query ?? '';
 
     const [searchInput, setSearchInput] = useState(currentQuery);
-    const [localUsers, setLocalUsers] = useState<SuggestedUser[]>(
-        page.props.suggestedUsers,
-    );
 
     useEffect(() => {
         setSearchInput(currentQuery);
     }, [currentQuery]);
-
-    useEffect(() => {
-        setLocalUsers(page.props.suggestedUsers);
-    }, [page.props.suggestedUsers]);
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -56,33 +49,15 @@ export default function RightSidebar() {
     };
 
     const handleFollowToggle = (userId: string, isFollowing: boolean) => {
-        setLocalUsers((prev) =>
-            prev.map((u) =>
-                u.id === userId
-                    ? { ...u, isFollowedByAuthUser: !isFollowing }
-                    : u,
-            ),
-        );
-
-        const rollback = () =>
-            setLocalUsers((prev) =>
-                prev.map((u) =>
-                    u.id === userId
-                        ? { ...u, isFollowedByAuthUser: isFollowing }
-                        : u,
-                ),
-            );
-
         if (isFollowing) {
             router.delete(unfollowUser.url(userId), {
-                only: [],
-                onError: rollback,
+                only: ['suggestedUsers'],
             });
         } else {
             router.post(
                 followUser.url(userId),
                 {},
-                { only: [], onError: rollback },
+                { only: ['suggestedUsers'] },
             );
         }
     };
@@ -105,13 +80,13 @@ export default function RightSidebar() {
             </form>
 
             {/* おすすめユーザー */}
-            {auth.user && localUsers.length > 0 && (
+            {auth.user && page.props.suggestedUsers.length > 0 && (
                 <div>
                     <h2 className="mb-3 text-lg font-bold text-[#191816]">
-                        フォロワーも知っている
+                        おすすめのユーザー
                     </h2>
                     <div className="space-y-4 rounded-md bg-[#eae4dc] p-4">
-                        {localUsers.map((user) => (
+                        {page.props.suggestedUsers.map((user) => (
                             <div
                                 key={user.id}
                                 className="flex items-center justify-between gap-2"

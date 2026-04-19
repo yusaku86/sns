@@ -145,6 +145,20 @@ it('getSuggestedUsers: 既にフォロー済みのユーザーは除外する', 
     expect(collect($result)->pluck('id')->all())->not->toContain($alreadyFollowed->id);
 });
 
+it('getFollowingIds: 指定ユーザーIDの中でフォロー済みのIDを返す', function () {
+    $auth = User::factory()->create();
+    $followed = User::factory()->create();
+    $notFollowed = User::factory()->create();
+
+    Follow::create(['follower_id' => $auth->id, 'following_id' => $followed->id]);
+
+    $repository = new EloquentFollowRepository;
+    $result = $repository->getFollowingIds($auth->id, [$followed->id, $notFollowed->id]);
+
+    expect($result)->toContain($followed->id)
+        ->and($result)->not->toContain($notFollowed->id);
+});
+
 it('getFollowers: 返される FollowUser の各フィールドが正しい', function () {
     $user = User::factory()->create();
     $follower = User::factory()->create(['name' => 'テストユーザー']);

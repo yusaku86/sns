@@ -8,6 +8,7 @@ use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 /**
  * おすすめユーザー一覧を取得するユースケース。
  * Stale-while-revalidate 戦略でキャッシュを管理する。
+ * ユーザーリストはキャッシュから返すが、isFollowedByAuthUser は毎回 DB から取得する。
  */
 class GetSuggestedUsersUseCase
 {
@@ -22,6 +23,7 @@ class GetSuggestedUsersUseCase
      * キャッシュなし: 同期計算して保存。
      * フレッシュ: キャッシュをそのまま返す。
      * ステール: 古いキャッシュを即返しつつバックグラウンドで再計算を依頼する。
+     * いずれの場合も isFollowedByAuthUser は DB から最新値を取得して付与する。
      *
      * @param  string  $authUserId  認証ユーザーID
      * @param  int  $limit  取得件数
@@ -34,14 +36,38 @@ class GetSuggestedUsersUseCase
         if ($cached === null) {
             $users = $this->followRepository->getSuggestedUsers($authUserId, $limit);
             $this->cache->put($authUserId, $users);
-
-            return $users;
+        } else {
+            if (! $this->cache->isFresh($authUserId)) {
+                $this->refresher->refresh($authUserId, $limit);
+            }
+            $users = $cached;
         }
 
-        if (! $this->cache->isFresh($authUserId)) {
-            $this->refresher->refresh($authUserId, $limit);
+        return $this->withFreshFollowStatus($authUserId, $users);
+    }
+
+    /**
+     * ユーザーリストの isFollowedByAuthUser を DB から取得した最新値で上書きして返す。
+     *
+     * @param  string  $authUserId  認証ユーザーID
+     * @param  FollowUser[]  $users  対象ユーザーリスト
+     * @return FollowUser[]
+     */
+    private function withFreshFollowStatus(string $authUserId, array $users): array
+    {
+        if (empty($users)) {
+            return [];
         }
 
-        return $cached;
+        $userIds = array_map(fn (FollowUser $u) => $u->id, $users);
+        $followingIds = array_flip($this->followRepository->getFollowingIds($authUserId, $userIds));
+
+        return array_map(fn (FollowUser $u) => new FollowUser(
+            id: $u->id,
+            name: $u->name,
+            handle: $u->handle,
+            profileImageUrl: $u->profileImageUrl,
+            isFollowedByAuthUser: isset($followingIds[$u->id]),
+        ), $users);
     }
 }

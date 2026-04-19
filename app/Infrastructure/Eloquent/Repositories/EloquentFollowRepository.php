@@ -149,4 +149,19 @@ class EloquentFollowRepository implements FollowRepositoryInterface
             isFollowedByAuthUser: isset($followedByAuth[$user->id]),
         ))->all();
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFollowingIds(string $authUserId, array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        return FollowModel::where('follower_id', $authUserId)
+            ->whereIn('following_id', $userIds)
+            ->pluck('following_id')
+            ->all();
+    }
 }

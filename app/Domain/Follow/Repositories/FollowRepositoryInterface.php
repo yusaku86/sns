@@ -54,11 +54,20 @@ interface FollowRepositoryInterface
 
     /**
      * フォロー中のユーザーがフォローしているユーザーを、フォロワー数の多い順に返す。
-     * 自分自身は除外する。フォロー済みユーザーも含み isFollowedByAuthUser で状態を示す。
+     * 自分自身・フォロー済みユーザーは除外する。
      *
      * @param  string  $authUserId  認証ユーザーID
      * @param  int  $limit  取得件数
      * @return FollowUser[]
      */
     public function getSuggestedUsers(string $authUserId, int $limit): array;
+
+    /**
+     * 指定ユーザーIDリストの中で、認証ユーザーがフォロー済みのIDを返す。
+     *
+     * @param  string  $authUserId  認証ユーザーID
+     * @param  string[]  $userIds  確認対象のユーザーIDリスト
+     * @return string[] フォロー済みのユーザーIDリスト
+     */
+    public function getFollowingIds(string $authUserId, array $userIds): array;
 }
