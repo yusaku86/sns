@@ -1,5 +1,6 @@
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { Heart, MessageCircle, Repeat2, Share, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import PostImages from '@/components/post-images';
 import type { PostImageData } from '@/components/post-images';
 import { show as showHashtag } from '@/routes/hashtags';
@@ -39,31 +40,36 @@ export default function PostCard({ post }: { post: Post }) {
 
     const { post: sendPost, delete: sendDelete, processing } = useForm();
 
+    const [likedByAuthUser, setLikedByAuthUser] = useState(
+        post.likedByAuthUser,
+    );
+    const [likesCount, setLikesCount] = useState(post.likesCount);
+    const [retweetedByAuthUser, setRetweetedByAuthUser] = useState(
+        post.retweetedByAuthUser,
+    );
+    const [retweetsCount, setRetweetsCount] = useState(post.retweetsCount);
+
     function handleLike() {
-        if (post.likedByAuthUser) {
-            sendDelete(unlikePost.url(post.id), {
-                preserveScroll: true,
-                preserveState: false,
-            });
+        const newLiked = !likedByAuthUser;
+        setLikedByAuthUser(newLiked);
+        setLikesCount((c) => (newLiked ? c + 1 : c - 1));
+
+        if (likedByAuthUser) {
+            sendDelete(unlikePost.url(post.id), { preserveScroll: true });
         } else {
-            sendPost(likePost.url(post.id), {
-                preserveScroll: true,
-                preserveState: false,
-            });
+            sendPost(likePost.url(post.id), { preserveScroll: true });
         }
     }
 
     function handleRetweet() {
-        if (post.retweetedByAuthUser) {
-            sendDelete(unretweetPost.url(post.id), {
-                preserveScroll: true,
-                preserveState: false,
-            });
+        const newRetweeted = !retweetedByAuthUser;
+        setRetweetedByAuthUser(newRetweeted);
+        setRetweetsCount((c) => (newRetweeted ? c + 1 : c - 1));
+
+        if (retweetedByAuthUser) {
+            sendDelete(unretweetPost.url(post.id), { preserveScroll: true });
         } else {
-            sendPost(retweetPost.url(post.id), {
-                preserveScroll: true,
-                preserveState: false,
-            });
+            sendPost(retweetPost.url(post.id), { preserveScroll: true });
         }
     }
 
@@ -185,14 +191,14 @@ export default function PostCard({ post }: { post: Post }) {
                                 }}
                                 disabled={processing}
                                 className={`flex items-center gap-1.5 text-sm transition-colors disabled:opacity-50 ${
-                                    post.retweetedByAuthUser
+                                    retweetedByAuthUser
                                         ? 'text-[#3a6c72]'
                                         : 'text-[#8a8784] hover:text-[#3a6c72]'
                                 }`}
                                 aria-label="リツイート"
                             >
                                 <Repeat2 size={18} />
-                                <span>{post.retweetsCount}</span>
+                                <span>{retweetsCount}</span>
                             </button>
                         ) : (
                             <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">
@@ -210,7 +216,7 @@ export default function PostCard({ post }: { post: Post }) {
                                 }}
                                 disabled={processing}
                                 className={`flex items-center gap-1.5 text-sm transition-colors disabled:opacity-50 ${
-                                    post.likedByAuthUser
+                                    likedByAuthUser
                                         ? 'text-[#b36b09]'
                                         : 'text-[#8a8784] hover:text-[#b36b09]'
                                 }`}
@@ -219,12 +225,12 @@ export default function PostCard({ post }: { post: Post }) {
                                 <Heart
                                     size={16}
                                     fill={
-                                        post.likedByAuthUser
+                                        likedByAuthUser
                                             ? 'currentColor'
                                             : 'none'
                                     }
                                 />
-                                <span>{post.likesCount}</span>
+                                <span>{likesCount}</span>
                             </button>
                         ) : (
                             <span className="flex items-center gap-1.5 text-sm text-[#8a8784]">

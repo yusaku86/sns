@@ -34,6 +34,7 @@ export default function Timeline({
     const { version, component } = usePage();
     const [allPosts, setAllPosts] = useState<Post[]>(posts);
     const [hasMoreState, setHasMoreState] = useState(hasMore);
+
     const cursorRef = useRef<string | null>(nextCursor);
     const loadingRef = useRef(false);
 

@@ -165,6 +165,7 @@ export default function UserShow({
 
     // インフィニットスクロール用の蓄積状態
     const [allPosts, setAllPosts] = useState<Post[]>(posts);
+
     const [hasMoreState, setHasMoreState] = useState(hasMore);
     const cursorRef = useRef<string | null>(nextCursor);
     const loadingRef = useRef(false);
