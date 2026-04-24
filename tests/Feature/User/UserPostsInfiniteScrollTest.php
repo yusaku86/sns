@@ -1,6 +1,7 @@
 <?php
 
 use App\Infrastructure\Eloquent\Models\Post;
+use App\Infrastructure\Eloquent\Models\Retweet;
 use App\Infrastructure\Eloquent\Models\User;
 
 it('プロフィールページにnextCursorとhasMoreが含まれる', function () {
@@ -58,5 +59,58 @@ it('カーソルを指定すると古い投稿を取得できる', function () {
         ->assertInertia(fn ($page) => $page
             ->has('posts', 1)
             ->where('hasMore', false)
+        );
+});
+
+it('リツイートした投稿が投稿タブに含まれる', function () {
+    $user = User::factory()->create();
+    $other = User::factory()->create();
+    $post = Post::factory()->create(['user_id' => $other->id]);
+    Retweet::factory()->create(['user_id' => $user->id, 'post_id' => $post->id]);
+
+    $this->withoutVite()
+        ->get(route('users.show', $user))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('users/show')
+            ->has('posts', 1)
+        );
+});
+
+it('自分の投稿とリツイートが混合表示される', function () {
+    $user = User::factory()->create();
+    $other = User::factory()->create();
+
+    Post::factory()->create(['user_id' => $user->id]);
+    $retweetedPost = Post::factory()->create(['user_id' => $other->id]);
+    Retweet::factory()->create(['user_id' => $user->id, 'post_id' => $retweetedPost->id]);
+
+    $this->withoutVite()
+        ->get(route('users.show', $user))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('users/show')
+            ->has('posts', 2)
+        );
+});
+
+it('リツイートを含めて21件あるときhasMore=trueを返す', function () {
+    $user = User::factory()->create();
+    $other = User::factory()->create();
+
+    // 自分の投稿 10件
+    Post::factory()->count(10)->create(['user_id' => $user->id]);
+    // 他ユーザーの投稿をリツイート 11件
+    $posts = Post::factory()->count(11)->create(['user_id' => $other->id]);
+    foreach ($posts as $post) {
+        Retweet::factory()->create(['user_id' => $user->id, 'post_id' => $post->id]);
+    }
+
+    $this->withoutVite()
+        ->get(route('users.show', $user))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('hasMore', true)
+            ->has('posts', 20)
         );
 });

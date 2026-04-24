@@ -2,11 +2,13 @@
 
 namespace App\Application\User;
 
+use App\Application\Shared\FeedMerger;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
 use App\Domain\Post\Entities\Post;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
+use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
 use App\Domain\User\Entities\User;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 
@@ -20,9 +22,11 @@ class GetUserProfileUseCase
     public function __construct(
         private UserRepositoryInterface $userRepository,
         private PostRepositoryInterface $postRepository,
+        private RetweetRepositoryInterface $retweetRepository,
         private ReplyRepositoryInterface $replyRepository,
         private LikeRepositoryInterface $likeRepository,
         private FollowRepositoryInterface $followRepository,
+        private FeedMerger $feedMerger,
     ) {}
 
     /**
@@ -41,23 +45,15 @@ class GetUserProfileUseCase
             return null;
         }
 
-        $rawPosts = $this->postRepository->getByUserId($userId, $authUserId, self::LIMIT + 1, $cursor);
-        $hasMore = count($rawPosts) > self::LIMIT;
-
-        if ($hasMore) {
-            array_pop($rawPosts);
-        }
-
-        $lastPost = end($rawPosts);
-        $nextCursor = ($hasMore && $lastPost)
-            ? ($lastPost->retweetedAt ?? $lastPost->createdAt)->format(\DateTimeInterface::ATOM)
-            : null;
+        $posts = $this->postRepository->getByUserId($userId, $authUserId, self::LIMIT + 1, $cursor);
+        $retweets = $this->retweetRepository->getByUserIdAsPost($userId, $authUserId, self::LIMIT + 1, $cursor);
+        $paginated = $this->feedMerger->paginate($posts, $retweets, self::LIMIT);
 
         return [
             'user' => $user,
-            'posts' => $rawPosts,
-            'nextCursor' => $nextCursor,
-            'hasMore' => $hasMore,
+            'posts' => $paginated['posts'],
+            'nextCursor' => $paginated['nextCursor'],
+            'hasMore' => $paginated['hasMore'],
             'replies' => $this->replyRepository->getByUserId($userId),
             'likedPosts' => $this->likeRepository->getLikedPostsByUserId($userId, $authUserId),
             'followers' => $this->followRepository->getFollowers($userId, $authUserId),

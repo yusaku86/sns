@@ -1,8 +1,10 @@
 <?php
 
 use App\Application\Explore\GetExploreUseCase;
+use App\Application\Shared\FeedMerger;
 use App\Domain\Post\Entities\Post;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
+use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
 
 function makeExplorePost(string $id, string $createdAt, ?string $retweetedAt = null): Post
 {
@@ -19,34 +21,34 @@ function makeExplorePost(string $id, string $createdAt, ?string $retweetedAt = n
     );
 }
 
-it('カーソルなし・20件以下の場合はhasMore=falseを返す', function () {
-    $posts = array_map(fn ($i) => makeExplorePost("p{$i}", '2026-01-01 00:00:00'), range(1, 5));
-
-    $repository = mock(PostRepositoryInterface::class);
-    $repository->shouldReceive('getAll')
-        ->once()
-        ->with(null, 21, null)
+function makeExploreUseCase(array $posts, array $retweets = [], ?string $authUserId = null, ?string $cursor = null): GetExploreUseCase
+{
+    $postRepo = mock(PostRepositoryInterface::class);
+    $postRepo->shouldReceive('getAll')
+        ->with($authUserId, 21, $cursor)
         ->andReturn($posts);
 
-    $useCase = new GetExploreUseCase($repository);
-    $result = $useCase->execute();
+    $retweetRepo = mock(RetweetRepositoryInterface::class);
+    $retweetRepo->shouldReceive('getAllAsPost')
+        ->with($authUserId, 21, $cursor)
+        ->andReturn($retweets);
+
+    return new GetExploreUseCase($postRepo, $retweetRepo, new FeedMerger);
+}
+
+it('カーソルなし・20件以下の場合はhasMore=falseを返す', function () {
+    $posts = array_map(fn ($i) => makeExplorePost("p{$i}", '2026-01-01 00:00:00'), range(1, 5));
+    $result = makeExploreUseCase($posts)->execute();
 
     expect($result['posts'])->toHaveCount(5)
         ->and($result['hasMore'])->toBeFalse()
         ->and($result['nextCursor'])->toBeNull();
 });
 
-it('21件返ってきた場合はhasMore=trueで20件にトリムする', function () {
-    $posts = array_map(fn ($i) => makeExplorePost("p{$i}", "2026-01-{$i}T12:00:00+00:00"), range(1, 21));
-
-    $repository = mock(PostRepositoryInterface::class);
-    $repository->shouldReceive('getAll')
-        ->once()
-        ->with(null, 21, null)
-        ->andReturn($posts);
-
-    $useCase = new GetExploreUseCase($repository);
-    $result = $useCase->execute();
+it('投稿とリツイートを合わせて21件以上あるときhasMore=trueで20件にトリムする', function () {
+    $posts = array_map(fn ($i) => makeExplorePost("p{$i}", "2026-01-{$i}T12:00:00+00:00"), range(1, 20));
+    $retweets = [makeExplorePost('rt1', '2025-12-01T00:00:00+00:00', '2026-01-21T00:00:00+00:00')];
+    $result = makeExploreUseCase($posts, $retweets)->execute();
 
     expect($result['posts'])->toHaveCount(20)
         ->and($result['hasMore'])->toBeTrue()
@@ -56,15 +58,7 @@ it('21件返ってきた場合はhasMore=trueで20件にトリムする', functi
 it('認証済みユーザーIDとカーソルをリポジトリに渡す', function () {
     $cursor = '2026-04-14T12:00:00+00:00';
     $posts = [makeExplorePost('p1', '2026-04-13T00:00:00+00:00')];
-
-    $repository = mock(PostRepositoryInterface::class);
-    $repository->shouldReceive('getAll')
-        ->once()
-        ->with('auth-user-1', 21, $cursor)
-        ->andReturn($posts);
-
-    $useCase = new GetExploreUseCase($repository);
-    $result = $useCase->execute('auth-user-1', $cursor);
+    $result = makeExploreUseCase($posts, [], 'auth-user-1', $cursor)->execute('auth-user-1', $cursor);
 
     expect($result['posts'])->toHaveCount(1)
         ->and($result['hasMore'])->toBeFalse();
@@ -74,16 +68,10 @@ it('hasMore=trueのときnextCursorはリツイートタイムスタンプを優
     $post20 = makeExplorePost('p20', '2026-04-01T12:00:00+00:00', '2026-04-02T08:00:00+00:00');
     $posts = array_map(fn ($i) => makeExplorePost("p{$i}", '2026-04-'.str_pad(21 - $i, 2, '0', STR_PAD_LEFT).'T12:00:00+00:00'), range(1, 19));
     $posts[] = $post20;
-    $posts[] = makeExplorePost('p21', '2026-03-31T12:00:00+00:00');
 
-    $repository = mock(PostRepositoryInterface::class);
-    $repository->shouldReceive('getAll')
-        ->once()
-        ->with(null, 21, null)
-        ->andReturn($posts);
+    $retweets = [makeExplorePost('rt1', '2026-03-31T12:00:00+00:00')];
 
-    $useCase = new GetExploreUseCase($repository);
-    $result = $useCase->execute();
+    $result = makeExploreUseCase($posts, $retweets)->execute();
 
     // 20件目(p20)のretweetedAt
     $expected = (new DateTimeImmutable('2026-04-02T08:00:00+00:00'))->format(DateTimeInterface::ATOM);

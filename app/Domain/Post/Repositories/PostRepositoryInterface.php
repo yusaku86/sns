@@ -64,7 +64,8 @@ interface PostRepositoryInterface
     public function getByHashtag(string $hashtagName, ?string $authUserId = null, int $limit = 20, ?string $cursor = null): array;
 
     /**
-     * 指定ユーザーの投稿一覧を返す。
+     * 指定ユーザーの投稿一覧をリツイートと混合して返す（プロフィール投稿タブ用）。
+     * 自分の投稿とリツイートを日時降順でマージし、カーソルページネーションで返す。
      *
      * @param  string  $userId  対象ユーザーID
      * @param  string|null  $authUserId  認証ユーザーID

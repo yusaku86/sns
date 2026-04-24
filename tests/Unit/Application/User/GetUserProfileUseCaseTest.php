@@ -1,11 +1,13 @@
 <?php
 
+use App\Application\Shared\FeedMerger;
 use App\Application\User\GetUserProfileUseCase;
 use App\Domain\Follow\Repositories\FollowRepositoryInterface;
 use App\Domain\Like\Repositories\LikeRepositoryInterface;
 use App\Domain\Post\Entities\Post;
 use App\Domain\Post\Repositories\PostRepositoryInterface;
 use App\Domain\Reply\Repositories\ReplyRepositoryInterface;
+use App\Domain\Retweet\Repositories\RetweetRepositoryInterface;
 use App\Domain\User\Entities\User;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 
@@ -54,42 +56,42 @@ function makeSubMocks(): array
     return [$replyRepo, $likeRepo, $followRepo];
 }
 
-it('カーソルなし・20件以下の場合はhasMore=falseを返す', function () {
+function makeProfileUseCase(
+    array $posts,
+    array $retweets = [],
+    ?string $cursor = null,
+): GetUserProfileUseCase {
     [$replyRepo, $likeRepo, $followRepo] = makeSubMocks();
 
     $userRepo = mock(UserRepositoryInterface::class);
     $userRepo->shouldReceive('findById')->andReturn(makeUserEntity());
 
     $postRepo = mock(PostRepositoryInterface::class);
-    $posts = array_map(fn ($i) => makeUserPost("p{$i}", '2026-01-01 00:00:00'), range(1, 5));
     $postRepo->shouldReceive('getByUserId')
-        ->once()
-        ->with('user-1', null, 21, null)
+        ->with('user-1', null, 21, $cursor)
         ->andReturn($posts);
 
-    $useCase = new GetUserProfileUseCase($userRepo, $postRepo, $replyRepo, $likeRepo, $followRepo);
-    $result = $useCase->execute('user-1');
+    $retweetRepo = mock(RetweetRepositoryInterface::class);
+    $retweetRepo->shouldReceive('getByUserIdAsPost')
+        ->with('user-1', null, 21, $cursor)
+        ->andReturn($retweets);
+
+    return new GetUserProfileUseCase($userRepo, $postRepo, $retweetRepo, $replyRepo, $likeRepo, $followRepo, new FeedMerger);
+}
+
+it('カーソルなし・20件以下の場合はhasMore=falseを返す', function () {
+    $posts = array_map(fn ($i) => makeUserPost("p{$i}", '2026-01-01 00:00:00'), range(1, 5));
+    $result = makeProfileUseCase($posts)->execute('user-1');
 
     expect($result['posts'])->toHaveCount(5)
         ->and($result['hasMore'])->toBeFalse()
         ->and($result['nextCursor'])->toBeNull();
 });
 
-it('21件返ってきた場合はhasMore=trueで20件にトリムする', function () {
-    [$replyRepo, $likeRepo, $followRepo] = makeSubMocks();
-
-    $userRepo = mock(UserRepositoryInterface::class);
-    $userRepo->shouldReceive('findById')->andReturn(makeUserEntity());
-
-    $postRepo = mock(PostRepositoryInterface::class);
-    $posts = array_map(fn ($i) => makeUserPost("p{$i}", "2026-04-{$i}T12:00:00+00:00"), range(1, 21));
-    $postRepo->shouldReceive('getByUserId')
-        ->once()
-        ->with('user-1', null, 21, null)
-        ->andReturn($posts);
-
-    $useCase = new GetUserProfileUseCase($userRepo, $postRepo, $replyRepo, $likeRepo, $followRepo);
-    $result = $useCase->execute('user-1');
+it('投稿とリツイートを合わせて21件以上あるときhasMore=trueで20件にトリムする', function () {
+    $posts = array_map(fn ($i) => makeUserPost("p{$i}", "2026-04-{$i}T12:00:00+00:00"), range(1, 20));
+    $retweets = [makeUserPost('rt1', '2025-12-01T00:00:00+00:00')];
+    $result = makeProfileUseCase($posts, $retweets)->execute('user-1');
 
     expect($result['posts'])->toHaveCount(20)
         ->and($result['hasMore'])->toBeTrue()
@@ -97,21 +99,9 @@ it('21件返ってきた場合はhasMore=trueで20件にトリムする', functi
 });
 
 it('カーソルありの場合はリポジトリにカーソルを渡す', function () {
-    [$replyRepo, $likeRepo, $followRepo] = makeSubMocks();
-
-    $userRepo = mock(UserRepositoryInterface::class);
-    $userRepo->shouldReceive('findById')->andReturn(makeUserEntity());
-
-    $postRepo = mock(PostRepositoryInterface::class);
     $cursor = '2026-04-14T12:00:00+00:00';
     $posts = [makeUserPost('p1', '2026-04-13T00:00:00+00:00')];
-    $postRepo->shouldReceive('getByUserId')
-        ->once()
-        ->with('user-1', null, 21, $cursor)
-        ->andReturn($posts);
-
-    $useCase = new GetUserProfileUseCase($userRepo, $postRepo, $replyRepo, $likeRepo, $followRepo);
-    $result = $useCase->execute('user-1', null, $cursor);
+    $result = makeProfileUseCase($posts, [], $cursor)->execute('user-1', null, $cursor);
 
     expect($result['posts'])->toHaveCount(1)
         ->and($result['hasMore'])->toBeFalse();
@@ -124,8 +114,9 @@ it('ユーザーが存在しない場合はnullを返す', function () {
     $userRepo->shouldReceive('findById')->with('non-existent', null)->andReturn(null);
 
     $postRepo = mock(PostRepositoryInterface::class);
+    $retweetRepo = mock(RetweetRepositoryInterface::class);
 
-    $useCase = new GetUserProfileUseCase($userRepo, $postRepo, $replyRepo, $likeRepo, $followRepo);
+    $useCase = new GetUserProfileUseCase($userRepo, $postRepo, $retweetRepo, $replyRepo, $likeRepo, $followRepo, new FeedMerger);
     $result = $useCase->execute('non-existent');
 
     expect($result)->toBeNull();
