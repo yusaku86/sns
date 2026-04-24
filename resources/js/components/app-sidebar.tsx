@@ -1,6 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Compass, Home, User } from 'lucide-react';
-import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -49,9 +48,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={timeline()} prefetch>
-                                <AppLogo />
-                            </Link>
+                            <Link href={timeline()} prefetch></Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
