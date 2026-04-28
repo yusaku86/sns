@@ -12,7 +12,7 @@
 | email | varchar(255) | unique |
 | email_verified_at | timestamp | nullable |
 | password | varchar(255) | |
-| bio | varchar(160) | nullable |
+| bio | text | nullable |
 | header_image | varchar(255) | nullable、ストレージパス |
 | profile_image | varchar(255) | nullable、ストレージパス |
 | two_factor_secret | varchar(255) | nullable、2FA TOTP シークレット |

@@ -17,7 +17,6 @@
 | ユーザープロフィール | `/users/{user}` | 不要 | AppLayout |
 | 設定（プロフィール） | `/settings/profile` | 必要 | AppLayout + SettingsLayout |
 | 設定（セキュリティ） | `/settings/security` | 必要 | AppLayout + SettingsLayout |
-| 設定（外観） | `/settings/appearance` | 必要 | AppLayout + SettingsLayout |
 
 ---
 

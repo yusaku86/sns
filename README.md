@@ -7,7 +7,7 @@
 
 ## 技術スタック
 
-- **バックエンド**: Laravel 12 / PHP 8.5
+- **バックエンド**: Laravel 13 / PHP 8.5
 - **フロントエンド**: React / TypeScript / Inertia.js
 - **データベース**: MySQL 8.4
 - **開発環境**: Docker / Laravel Sail
